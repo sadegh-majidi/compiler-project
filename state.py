@@ -1,3 +1,6 @@
+import re
+
+
 class State:
     def __init__(self, name) -> None:
         self.name = name
@@ -23,7 +26,16 @@ REGEX = {
 class InitialState(State):
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['digit'], character):
+            return STATES['number']
+        if re.match(REGEX['alphabet'], character):
+            return STATES['identifier']
+        if re.match(REGEX['symbol'], character):
+            return STATES['symbol']
+        if re.match(REGEX['whitespace'], character):
+            return STATES['whitespace']
+        if re.match(REGEX['slash'], character):
+            return STATES['comment']
 
 
 class NumberState(State):
@@ -44,6 +56,12 @@ class SymbolState(State):
         pass
 
 
+class CommentState(State):
+
+    def get_next_state(self, character: str):
+        pass
+
+
 class SingleLineCommentState(State):
 
     def get_next_state(self, character: str):
@@ -56,11 +74,19 @@ class MultiLineCommentState(State):
         pass
 
 
+class WhitespaceState(State):
+
+    def get_next_state(self, character: str):
+        pass
+
+
 STATES = {
     'initial': InitialState('initial'),
     'number': NumberState('number'),
     'identifier': IdentifierState('identifier'),
     'symbol': SymbolState('symbol'),
+    'comment': CommentState('comment'),
     'single_line_comment': SingleLineCommentState('single_line_comment'),
-    'multi_line_comment': MultiLineCommentState('multi_line_comment')
+    'multi_line_comment': MultiLineCommentState('multi_line_comment'),
+    'whitespace': WhitespaceState('whitespace')
 }
