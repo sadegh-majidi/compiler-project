@@ -41,31 +41,76 @@ class InitialState(State):
 class NumberState(State):
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['digit'], character):
+            return STATES['number']
+        if re.match(REGEX['symbol'], character):
+            return STATES['symbol']
+        if re.match(REGEX['whitespace'], character):
+            return STATES['whitespace']
+        if re.match(REGEX['slash']):
+            return STATES['comment']
 
 
 class IdentifierState(State):
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['digit'], character) or re.match(REGEX['alphabet']):
+            return STATES['number']
+        if re.match(REGEX['symbol'], character):
+            return STATES['symbol']
+        if re.match(REGEX['whitespace'], character):
+            return STATES['whitespace']
+        if re.match(REGEX['slash']):
+            return STATES['comment']
 
 
 class SymbolState(State):
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['digit'], character):
+            return STATES['number']
+        if re.match(REGEX['alphabet'], character):
+            return STATES['identifier']
+        if re.match(REGEX['symbol'], character):
+            return STATES['symbol']
+        if re.match(REGEX['whitespace'], character):
+            return STATES['whitespace']
+        if re.match(REGEX['slash']):
+            return STATES['comment']
 
 
 class CommentState(State):
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['digit'], character):
+            return STATES['number']
+        if re.match(REGEX['alphabet'], character):
+            return STATES['identifier']
+        if re.match(REGEX['symbol'], character):
+            return STATES['symbol']
+        if re.match(REGEX['whitespace'], character):
+            return STATES['whitespace']
+        if re.match(REGEX[r'^\*$]'], character):
+            return STATES['multi_line_comment']
+        if re.match(REGEX['slash']):
+            return STATES['single_line_comment']
 
 
 class SingleLineCommentState(State):
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['digit'], character):
+            return STATES['single_line_comment']
+        if re.match(REGEX['single_line_comment_starter'], character):
+            return STATES['single_line_comment']
+        if re.match(REGEX['symbol'], character):
+            return STATES['symbol']
+        if re.match(REGEX['whitespace'], character):
+            return STATES['whitespace']
+        if re.match(REGEX['new_line'], character):
+            return STATES['initial']
+        if re.match(REGEX['slash']):
+            return STATES['single_line_comment']
 
 
 class MultiLineCommentState(State):
@@ -77,7 +122,16 @@ class MultiLineCommentState(State):
 class WhitespaceState(State):
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['digit'], character):
+            return STATES['number']
+        if re.match(REGEX['alphabet'], character):
+            return STATES['identifier']
+        if re.match(REGEX['symbol'], character):
+            return STATES['symbol']
+        if re.match(REGEX['whitespace'], character):
+            return STATES['whitespace']
+        if re.match(REGEX['slash']):
+            return STATES['comment']
 
 
 STATES = {
