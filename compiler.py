@@ -30,6 +30,9 @@ class LexicalAnalyzer:
                 self.state = new_state
             elif new_state == self.state:
                 self.token += char
+            elif self.state == STATES['comment'] and (new_state == STATES['single_line_comment'] or new_state == STATES['multi_line_comment']):
+                self.token += char
+                self.state = new_state
             else:
                 index -= 1
 

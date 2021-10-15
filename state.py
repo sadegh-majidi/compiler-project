@@ -20,6 +20,7 @@ REGEX = {
     'whitespace': r'^\n|\r|\t|\v|\f| $',
     'new_line': r'^\n$',
     'slash': r'^/$',
+    'star': r'^\*$',
     'single_line_comment_starter': r'^//$',
     'multi_line_comment_starter': r'^/\*$',
     'multi_line_comment_finisher': r'^\*/$',
@@ -94,15 +95,15 @@ class SymbolState(State):
 class CommentState(State):
 
     def get_next_state(self, character: str):
-        if re.match(REGEX['digit'], character):
-            return STATES['number']
-        if re.match(REGEX['alphabet'], character):
-            return STATES['identifier']
-        if re.match(REGEX['symbol'], character):
-            return STATES['symbol']
-        if re.match(REGEX['whitespace'], character):
-            return STATES['whitespace']
-        if re.match(REGEX[r'^\*$'], character):
+        # if re.match(REGEX['digit'], character):
+        #     return STATES['number']
+        # if re.match(REGEX['alphabet'], character):
+        #     return STATES['identifier']
+        # if re.match(REGEX['symbol'], character):
+        #     return STATES['symbol']
+        # if re.match(REGEX['whitespace'], character):
+        #     return STATES['whitespace']
+        if re.match(REGEX['star'], character):
             return STATES['multi_line_comment']
         if re.match(REGEX['slash'], character):
             return STATES['single_line_comment']
@@ -111,24 +112,35 @@ class CommentState(State):
 class SingleLineCommentState(State):
 
     def get_next_state(self, character: str):
-        if re.match(REGEX['digit'], character):
-            return STATES['single_line_comment']
-        if re.match(REGEX['single_line_comment_starter'], character):
-            return STATES['single_line_comment']
-        if re.match(REGEX['symbol'], character):
-            return STATES['symbol']
-        if re.match(REGEX['whitespace'], character):
-            return STATES['whitespace']
         if re.match(REGEX['new_line'], character):
-            return STATES['initial']
-        if re.match(REGEX['slash'], character):
+            return STATES['whitespace']
+        else:
             return STATES['single_line_comment']
 
 
 class MultiLineCommentState(State):
+    star_detected = False
+    comment_ended = False
 
     def get_next_state(self, character: str):
-        pass
+        if re.match(REGEX['slash'], character):
+            if self.star_detected:
+                self.star_detected = False
+                self.comment_ended = True
+                return STATES['multi_line_comment']
+            else:
+                return STATES['multi_line_comment']
+
+        if self.comment_ended:
+            self.comment_ended = False
+            return STATES['initial']
+
+        if re.match(REGEX['star'], character):
+            self.star_detected = True
+            return STATES['multi_line_comment']
+        else:
+            self.star_detected = False
+            return STATES['multi_line_comment']
 
 
 class WhitespaceState(State):
