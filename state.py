@@ -8,13 +8,16 @@ class State:
     def get_next_state(self, character: str):
         raise NotImplementedError
 
+    def __eq__(self, other):
+        return self.name == other.name
+
 
 REGEX = {
     'digit': r'^\d$',
     'alphabet': r'^[a-zA-Z]$',
     'keyword': r'^if|else|void|int|repeat|break|until|return$',
     'symbol': r'^;|:|\[|]|\(|\)|{|}|\+|-|\*|=|<$',
-    'whitespace': r'^\n|\r|\t|\v|\f$',
+    'whitespace': r'^\n|\r|\t|\v|\f| $',
     'new_line': r'^\n$',
     'slash': r'^/$',
     'single_line_comment_starter': r'^//$',
@@ -47,20 +50,20 @@ class NumberState(State):
             return STATES['symbol']
         if re.match(REGEX['whitespace'], character):
             return STATES['whitespace']
-        if re.match(REGEX['slash']):
+        if re.match(REGEX['slash'], character):
             return STATES['comment']
 
 
 class IdentifierState(State):
 
     def get_next_state(self, character: str):
-        if re.match(REGEX['digit'], character) or re.match(REGEX['alphabet']):
-            return STATES['number']
+        if re.match(REGEX['digit'], character) or re.match(REGEX['alphabet'], character):
+            return STATES['identifier']
         if re.match(REGEX['symbol'], character):
             return STATES['symbol']
         if re.match(REGEX['whitespace'], character):
             return STATES['whitespace']
-        if re.match(REGEX['slash']):
+        if re.match(REGEX['slash'], character):
             return STATES['comment']
 
 
@@ -75,7 +78,7 @@ class SymbolState(State):
             return STATES['symbol']
         if re.match(REGEX['whitespace'], character):
             return STATES['whitespace']
-        if re.match(REGEX['slash']):
+        if re.match(REGEX['slash'], character):
             return STATES['comment']
 
 
@@ -90,9 +93,9 @@ class CommentState(State):
             return STATES['symbol']
         if re.match(REGEX['whitespace'], character):
             return STATES['whitespace']
-        if re.match(REGEX[r'^\*$]'], character):
+        if re.match(REGEX[r'^\*$'], character):
             return STATES['multi_line_comment']
-        if re.match(REGEX['slash']):
+        if re.match(REGEX['slash'], character):
             return STATES['single_line_comment']
 
 
@@ -109,7 +112,7 @@ class SingleLineCommentState(State):
             return STATES['whitespace']
         if re.match(REGEX['new_line'], character):
             return STATES['initial']
-        if re.match(REGEX['slash']):
+        if re.match(REGEX['slash'], character):
             return STATES['single_line_comment']
 
 
@@ -130,7 +133,7 @@ class WhitespaceState(State):
             return STATES['symbol']
         if re.match(REGEX['whitespace'], character):
             return STATES['whitespace']
-        if re.match(REGEX['slash']):
+        if re.match(REGEX['slash'], character):
             return STATES['comment']
 
 
