@@ -22,7 +22,8 @@ REGEX = {
     'slash': r'^/$',
     'single_line_comment_starter': r'^//$',
     'multi_line_comment_starter': r'^/\*$',
-    'multi_line_comment_finisher': r'^\*/$'
+    'multi_line_comment_finisher': r'^\*/$',
+    'equal_sign': r'^=$'
 }
 
 
@@ -68,14 +69,22 @@ class IdentifierState(State):
 
 
 class SymbolState(State):
+    double_equal = False
 
     def get_next_state(self, character: str):
         if re.match(REGEX['digit'], character):
             return STATES['number']
         if re.match(REGEX['alphabet'], character):
             return STATES['identifier']
+        if re.match(REGEX['equal_sign'], character):
+            if self.double_equal:
+                self.double_equal = False
+                return STATES['initial']
+            else:
+                self.double_equal = True
+                return STATES['symbol']
         if re.match(REGEX['symbol'], character):
-            return STATES['symbol']
+            return STATES['initial']
         if re.match(REGEX['whitespace'], character):
             return STATES['whitespace']
         if re.match(REGEX['slash'], character):
