@@ -51,8 +51,7 @@ class LexicalAnalyzer:
 if __name__ == '__main__':
     lexical_analyser = LexicalAnalyzer()
     while True:
-        lexical_analyser.get_next_token()
-        # try:
-        #     lexical_analyser.get_next_token()
-        # except:
-        #     break
+        try:
+            lexical_analyser.get_next_token()
+        except IndexError:
+            break
