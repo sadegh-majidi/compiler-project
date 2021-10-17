@@ -1,5 +1,7 @@
 import re
 
+from errors import InvalidNumberError
+
 
 class State:
     def __init__(self, name) -> None:
@@ -54,6 +56,8 @@ class NumberState(State):
             return STATES['whitespace']
         if re.match(REGEX['slash'], character):
             return STATES['comment']
+        if re.match(REGEX['alphabet'], character):
+            raise InvalidNumberError()
 
 
 class IdentifierState(State):

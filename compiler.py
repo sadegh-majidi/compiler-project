@@ -1,11 +1,19 @@
 import re
 
-from errors import InputProgramFinishedException
+from errors import InputProgramFinishedException, InvalidNumberError
 from state import STATES, REGEX
 
 
 class ErrorHandler:
-    pass
+    has_lexical_error = False
+
+    INVALID_NUMBER = 'Invalid number'
+
+    @staticmethod
+    def write_lexical_error(line_number: int, error_type: str, error_message: str):
+        ErrorHandler.has_lexical_error = True
+        with open('lexical_errors.txt', 'a') as f:
+            f.write(f'{line_number}.\t({error_message}, {error_type})\n')
 
 
 class SymbolTableHandler:
@@ -44,41 +52,48 @@ class LexicalAnalyzer:
     def _get_next_token(self):
         index = self.index
         while True:
-            char = self.input[index]
-            index += 1
-            new_state = self.state.get_next_state(char)
-            if self.state.name == 'initial':
-                self.token += char
-                self.state = new_state
-            elif new_state == self.state:
-                self.token += char
-            elif self.state == STATES['comment'] and (new_state == STATES['single_line_comment'] or new_state == STATES['multi_line_comment']):
-                self.token += char
-                self.state = new_state
-            else:
-                index -= 1
+            try:
+                char = self.input[index]
+                index += 1
+                new_state = self.state.get_next_state(char)
+                if self.state.name == 'initial':
+                    self.token += char
+                    self.state = new_state
+                elif new_state == self.state:
+                    self.token += char
+                elif self.state == STATES['comment'] and (new_state == STATES['single_line_comment'] or new_state == STATES['multi_line_comment']):
+                    self.token += char
+                    self.state = new_state
+                else:
+                    index -= 1
 
-                if self.state.name in {'number', 'identifier', 'symbol'}:
-                    token_type = self.state.name
-                    if token_type == 'identifier' and SymbolTableHandler.is_token_keyword(self.token):
-                        token_type = 'keyword'
+                    if self.state.name in {'number', 'identifier', 'symbol'}:
+                        token_type = self.state.name
+                        if token_type == 'identifier' and SymbolTableHandler.is_token_keyword(self.token):
+                            token_type = 'keyword'
 
-                    token = (token_type, self.token)
-                    self.valid_tokens.append(token)
-                    if token_type == 'identifier':
-                        SymbolTableHandler.add_token_to_table(token)
-                    self.index = index
+                        token = (token_type, self.token)
+                        self.valid_tokens.append(token)
+                        if token_type == 'identifier':
+                            SymbolTableHandler.add_token_to_table(token)
+                        self.index = index
+                        self.state = STATES['initial']
+                        self.token = ''
+                        break
+
                     self.state = STATES['initial']
                     self.token = ''
-                    break
+                    continue
 
+                if char == '\n':
+                    self.flush_tokens()
+                    self.line_number += 1
+            except InvalidNumberError:
+                self.token += char
+                ErrorHandler.write_lexical_error(self.line_number, ErrorHandler.INVALID_NUMBER, self.token)
+                self.index = index
                 self.state = STATES['initial']
                 self.token = ''
-                continue
-
-            if char == '\n':
-                self.flush_tokens()
-                self.line_number += 1
 
     def get_next_token(self):
         try:
@@ -97,6 +112,10 @@ class LexicalAnalyzer:
                 self.flush_tokens()
                 self.state = STATES['initial']
                 self.token = ''
+
+            if not ErrorHandler.has_lexical_error:
+                with open('lexical_errors.txt', 'a') as f:
+                    f.write('There is no lexical error.')
 
             raise InputProgramFinishedException()
 
