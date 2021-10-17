@@ -105,4 +105,17 @@ if __name__ == '__main__':
         try:
             lexical_analyser.get_next_token()
         except IndexError:
+            if lexical_analyser.token:
+                if lexical_analyser.state.name in {'number', 'identifier', 'symbol'}:
+                    token_type = lexical_analyser.state.name
+                    if token_type == 'identifier' and SymbolTableHandler.is_token_keyword(lexical_analyser.token):
+                        token_type = 'keyword'
+
+                    token = (token_type, lexical_analyser.token)
+                    lexical_analyser.valid_tokens.append(token)
+                    if token_type == 'identifier':
+                        SymbolTableHandler.add_token_to_table(token)
+                lexical_analyser.flush_tokens()
+                lexical_analyser.state = STATES['initial']
+                lexical_analyser.token = ''
             break
