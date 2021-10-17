@@ -1,5 +1,6 @@
 import re
 
+from errors import InputProgramFinishedException
 from state import STATES, REGEX
 
 
@@ -40,7 +41,7 @@ class LexicalAnalyzer:
             self.input = f.read()
         SymbolTableHandler.init_table()
 
-    def get_next_token(self):
+    def _get_next_token(self):
         index = self.index
         while True:
             char = self.input[index]
@@ -79,6 +80,26 @@ class LexicalAnalyzer:
                 self.flush_tokens()
                 self.line_number += 1
 
+    def get_next_token(self):
+        try:
+            self._get_next_token()
+        except IndexError:
+            if self.token:
+                if self.state.name in {'number', 'identifier', 'symbol'}:
+                    token_type = self.state.name
+                    if token_type == 'identifier' and SymbolTableHandler.is_token_keyword(self.token):
+                        token_type = 'keyword'
+
+                    token = (token_type, self.token)
+                    self.valid_tokens.append(token)
+                    if token_type == 'identifier':
+                        SymbolTableHandler.add_token_to_table(token)
+                self.flush_tokens()
+                self.state = STATES['initial']
+                self.token = ''
+
+            raise InputProgramFinishedException()
+
     def flush_tokens(self):
         if not self.valid_tokens:
             return
@@ -104,18 +125,5 @@ if __name__ == '__main__':
     while True:
         try:
             lexical_analyser.get_next_token()
-        except IndexError:
-            if lexical_analyser.token:
-                if lexical_analyser.state.name in {'number', 'identifier', 'symbol'}:
-                    token_type = lexical_analyser.state.name
-                    if token_type == 'identifier' and SymbolTableHandler.is_token_keyword(lexical_analyser.token):
-                        token_type = 'keyword'
-
-                    token = (token_type, lexical_analyser.token)
-                    lexical_analyser.valid_tokens.append(token)
-                    if token_type == 'identifier':
-                        SymbolTableHandler.add_token_to_table(token)
-                lexical_analyser.flush_tokens()
-                lexical_analyser.state = STATES['initial']
-                lexical_analyser.token = ''
+        except InputProgramFinishedException:
             break
