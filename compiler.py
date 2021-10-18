@@ -1,6 +1,6 @@
 import re
 
-from errors import InputProgramFinishedException, InvalidNumberError
+from errors import InputProgramFinishedException, InvalidNumberError, UnmatchedCommentError
 from state import STATES, REGEX
 
 
@@ -9,6 +9,7 @@ class ErrorHandler:
 
     INVALID_NUMBER = 'Invalid number'
     UNCLOSED_COMMENT = 'Unclosed comment'
+    UNMATCHED_COMMENT = 'Unmatched comment'
 
     @staticmethod
     def write_lexical_error(line_number: int, error_type: str, error_message: str):
@@ -92,6 +93,11 @@ class LexicalAnalyzer:
             except InvalidNumberError:
                 self.token += char
                 ErrorHandler.write_lexical_error(self.line_number, ErrorHandler.INVALID_NUMBER, self.token)
+                self.index = index
+                self.state = STATES['initial']
+                self.token = ''
+            except UnmatchedCommentError:
+                ErrorHandler.write_lexical_error(self.line_number, ErrorHandler.UNMATCHED_COMMENT, '*/')
                 self.index = index
                 self.state = STATES['initial']
                 self.token = ''
