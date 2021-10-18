@@ -99,14 +99,6 @@ class SymbolState(State):
 class CommentState(State):
 
     def get_next_state(self, character: str):
-        # if re.match(REGEX['digit'], character):
-        #     return STATES['number']
-        # if re.match(REGEX['alphabet'], character):
-        #     return STATES['identifier']
-        # if re.match(REGEX['symbol'], character):
-        #     return STATES['symbol']
-        # if re.match(REGEX['whitespace'], character):
-        #     return STATES['whitespace']
         if re.match(REGEX['star'], character):
             return STATES['multi_line_comment']
         if re.match(REGEX['slash'], character):
