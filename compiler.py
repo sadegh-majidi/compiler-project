@@ -8,6 +8,7 @@ class ErrorHandler:
     has_lexical_error = False
 
     INVALID_NUMBER = 'Invalid number'
+    UNCLOSED_COMMENT = 'Unclosed comment'
 
     @staticmethod
     def write_lexical_error(line_number: int, error_type: str, error_message: str):
@@ -109,7 +110,13 @@ class LexicalAnalyzer:
                     self.valid_tokens.append(token)
                     if token_type == 'identifier':
                         SymbolTableHandler.add_token_to_table(token)
+
                 self.flush_tokens()
+
+                if self.state == STATES['multi_line_comment']:
+                    comment_start_line = self.line_number - self.token.count('\n')
+                    ErrorHandler.write_lexical_error(comment_start_line, ErrorHandler.UNCLOSED_COMMENT, self.token)
+
                 self.state = STATES['initial']
                 self.token = ''
 
