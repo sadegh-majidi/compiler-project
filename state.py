@@ -1,6 +1,6 @@
 import re
 
-from errors import InvalidNumberError
+from errors import InvalidNumberError, UnmatchedCommentError
 
 
 class State:
@@ -38,7 +38,12 @@ class InitialState(State):
         if re.match(REGEX['alphabet'], character):
             return STATES['identifier']
         if re.match(REGEX['symbol'], character):
-            return STATES['symbol']
+            state = STATES['symbol']
+            if re.match(REGEX['star'], character):
+                state.star_detected = True
+            else:
+                state.star_detected = False
+            return state
         if re.match(REGEX['whitespace'], character):
             return STATES['whitespace']
         if re.match(REGEX['slash'], character):
@@ -75,13 +80,23 @@ class IdentifierState(State):
 
 class SymbolState(State):
     double_equal = False
+    star_detected = False
 
     def get_next_state(self, character: str):
+        if re.match(REGEX['slash'], character):
+            if self.star_detected:
+                self.star_detected = False
+                raise UnmatchedCommentError
+            self.star_detected = False
+            return STATES['comment']
         if re.match(REGEX['digit'], character):
+            self.star_detected = False
             return STATES['number']
         if re.match(REGEX['alphabet'], character):
+            self.star_detected = False
             return STATES['identifier']
         if re.match(REGEX['equal_sign'], character):
+            self.star_detected = False
             if self.double_equal:
                 self.double_equal = False
                 return STATES['initial']
@@ -89,11 +104,12 @@ class SymbolState(State):
                 self.double_equal = True
                 return STATES['symbol']
         if re.match(REGEX['symbol'], character):
+            self.star_detected = False
             return STATES['initial']
         if re.match(REGEX['whitespace'], character):
+            self.star_detected = False
             return STATES['whitespace']
-        if re.match(REGEX['slash'], character):
-            return STATES['comment']
+        self.star_detected = False
 
 
 class CommentState(State):
