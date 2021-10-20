@@ -17,7 +17,7 @@ class State:
 REGEX = {
     'digit': r'^\d$',
     'alphabet': r'^[a-zA-Z]$',
-    'keyword': r'^if|else|void|int|repeat|break|until|return$',
+    'keyword': r'^(^if$)|(^else$)|(^void$)|(^int$)|(^repeat$)|(^break$)|(^until$)|(^return$)$',
     'symbol': r'^;|:|\[|]|\(|\)|{|}|\+|-|\*|=|<|,$',
     'whitespace': r'^\n|\r|\t|\v|\f| $',
     'new_line': r'^\n$',
