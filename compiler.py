@@ -108,7 +108,7 @@ class LexicalAnalyzer:
                 self.token = ''
             except InvalidInputError:
                 if self.state.name == 'symbol':
-                    if self.token != '=':
+                    if self.token not in {'=', '*'}:
                         token_type = self.state.name
                         token = (token_type, self.token)
                         self.valid_tokens.append(token)
