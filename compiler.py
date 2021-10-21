@@ -145,14 +145,17 @@ class LexicalAnalyzer:
                     if token_type == 'identifier':
                         SymbolTableHandler.add_token_to_table(token)
 
-                self.flush_tokens()
-
                 if self.state == STATES['multi_line_comment'] and self.token[-2:] != '*/':
                     comment_start_line = self.line_number - self.token.count('\n')
                     ErrorHandler.write_lexical_error(comment_start_line, ErrorHandler.UNCLOSED_COMMENT, self.token[:7] + '...')
 
+                if self.state == STATES['comment']:
+                    ErrorHandler.write_lexical_error(self.line_number, ErrorHandler.INVALID_INPUT, self.token)
+
                 self.state = STATES['initial']
                 self.token = ''
+
+            self.flush_tokens()
 
             if not ErrorHandler.has_lexical_error:
                 with open('lexical_errors.txt', 'a') as f:
