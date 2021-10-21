@@ -72,7 +72,7 @@ class NumberState(State):
         if re.match(REGEX['alphabet'], character):
             raise InvalidNumberError
 
-        raise InvalidInputError
+        raise InvalidNumberError
 
 
 class IdentifierState(State):
