@@ -1,6 +1,7 @@
 import re
 
-from errors import InputProgramFinishedException, InvalidNumberError, UnmatchedCommentError, InvalidInputError
+from errors import InputProgramFinishedException, InvalidNumberError, UnmatchedCommentError, InvalidInputError, \
+    CommentInvalidInputError
 from state import STATES, REGEX
 
 
@@ -119,6 +120,12 @@ class LexicalAnalyzer:
                     char = '/'
                     index -= 1
 
+                self.token += char
+                ErrorHandler.write_lexical_error(self.line_number, ErrorHandler.INVALID_INPUT, self.token)
+                self.index = index
+                self.state = STATES['initial']
+                self.token = ''
+            except CommentInvalidInputError:
                 self.token += char
                 ErrorHandler.write_lexical_error(self.line_number, ErrorHandler.INVALID_INPUT, self.token)
                 self.index = index

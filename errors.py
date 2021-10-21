@@ -2,6 +2,10 @@ class InvalidInputError(Exception):
     pass
 
 
+class CommentInvalidInputError(Exception):
+    pass
+
+
 class InvalidNumberError(Exception):
     pass
 

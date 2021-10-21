@@ -1,6 +1,6 @@
 import re
 
-from errors import InvalidNumberError, UnmatchedCommentError, InvalidInputError
+from errors import InvalidNumberError, UnmatchedCommentError, InvalidInputError, CommentInvalidInputError
 
 
 class State:
@@ -140,7 +140,16 @@ class CommentState(State):
         if re.match(REGEX['slash'], character):
             return STATES['single_line_comment']
 
-        raise InvalidInputError
+        if re.match(REGEX['digit'], character):
+            raise InvalidInputError
+        if re.match(REGEX['alphabet'], character):
+            raise InvalidInputError
+        if re.match(REGEX['symbol'], character):
+            raise InvalidInputError
+        if re.match(REGEX['whitespace'], character):
+            raise InvalidInputError
+
+        raise CommentInvalidInputError
 
 
 class SingleLineCommentState(State):
