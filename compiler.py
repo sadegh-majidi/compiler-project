@@ -34,7 +34,7 @@ class SymbolTableHandler:
 
     @staticmethod
     def init_table():
-        for keyword in ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return']:
+        for keyword in ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'endif']:
             with open('symbol_table.txt', 'a') as f:
                 SymbolTableHandler.table[keyword] = {'type': 'keyword'}
                 f.write(f'{len(SymbolTableHandler.table)}.\t{keyword}\n')
