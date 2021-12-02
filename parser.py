@@ -95,12 +95,16 @@ def set_first_and_follows():
 
 
 def initialize_diagrams():
-    current_token = grammar_production_rules[0][0]
+    global grammar_production_rules
+    grammar = open('grammar_original', 'r').read()
+    grammar_production_rules = re.split('\n', grammar)
+    current_token = 'Program'
     cur_state = State('Program', {"Declaration-list: 1"})
     state_count = 1
     state_count_temp = 1
     states = [cur_state]
-    for rule in grammar_production_rules:
+    for rule in grammar_production_rules[1:]:
+        rule = re.split(' -> | \|', rule).split(" ")
         if rule[0] == current_token:
             cur_state = states[state_count]
         else:
@@ -108,15 +112,15 @@ def initialize_diagrams():
             cur_state = State(rule[0], {})
             states.append(cur_state)
 
-        for smt in rule:
+        for smt in rule[1:]:
             if smt == 'EPSILON':
                 cur_state.has_epsilon = True
 
+            state_count_temp += 1
             cur_state.children[smt] = state_count_temp
 
             cur_state = State(rule[0], {})
             states.append(cur_state)
-            state_count_temp += 1
 
 
 def create_table():
