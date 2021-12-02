@@ -1,0 +1,45 @@
+Additive-expression ( ID NUM
+Additive-expression-prime ( EPSILON
+Additive-expression-zegond ( NUM
+Addop + -
+Arg-list ( ID NUM
+Arg-list-prime , EPSILON
+Args ( EPSILON ID NUM
+B ( = EPSILON [
+C < == EPSILON
+Compound-stmt {
+D + - EPSILON
+Declaration int void
+Declaration-initial int void
+Declaration-list EPSILON int void
+Declaration-prime ( ; [
+Else-stmt else endif
+Expression ( ID NUM
+Expression-stmt ( ; ID NUM break
+Factor ( ID NUM
+Factor-prime ( EPSILON
+Factor-zegond ( NUM
+Fun-declaration-prime (
+G * EPSILON
+H * = EPSILON
+Iteration-stmt repeat
+Param int void
+Param-list , EPSILON
+Param-prime EPSILON [
+Params int void
+Program EPSILON int void
+Relop < ==
+Return-stmt return
+Return-stmt-prime ( ; ID NUM
+Selection-stmt if
+Simple-expression-prime ( EPSILON
+Simple-expression-zegond ( NUM
+Statement ( ; ID NUM break if repeat return {
+Statement-list ( ; EPSILON ID NUM break if repeat return {
+Term ( ID NUM
+Term-prime ( EPSILON
+Term-zegond ( NUM
+Type-specifier int void
+Var-call-prime ( EPSILON [
+Var-declaration-prime ; [
+Var-prime EPSILON [

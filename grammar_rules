@@ -1,0 +1,78 @@
+Program -> Declaration-list $
+Declaration-list -> Declaration Declaration-list
+Declaration-list -> EPSILON
+Declaration -> Declaration-initial Declaration-prime
+Declaration-initial -> Type-specifier ID
+Declaration-prime -> Fun-declaration-prime
+Declaration-prime -> Var-declaration-prime
+Var-declaration-prime -> ;
+Var-declaration-prime -> [ NUM ] ;
+Fun-declaration-prime -> ( Params ) Compound-stmt
+Type-specifier -> int
+Type-specifier -> void
+Params -> int ID Param-prime Param-list
+Params -> void
+Param-list -> , Param Param-list
+Param-list -> EPSILON
+Param -> Declaration-initial Param-prime
+Param-prime -> [ ]
+Param-prime -> EPSILON
+Compound-stmt -> { Declaration-list Statement-list }
+Statement-list -> Statement Statement-list
+Statement-list -> EPSILON
+Statement -> Expression-stmt
+Statement -> Compound-stmt
+Statement -> Selection-stmt
+Statement -> Iteration-stmt
+Statement -> Return-stmt
+Expression-stmt -> Expression ;
+Expression-stmt -> break ;
+Expression-stmt -> ;
+Selection-stmt -> if ( Expression ) Statement Else-stmt
+Else-stmt -> endif |
+Else-stmt -> else Statement endif
+Iteration-stmt -> repeat Statement until ( Expression )
+Return-stmt -> return Return-stmt-prime
+Return-stmt-prime -> ;
+Return-stmt-prime -> Expression ;
+Expression -> Simple-expression-zegond
+Expression -> ID B
+B -> = Expression
+B -> [ Expression ] H
+B -> Simple-expression-prime
+H -> = Expression
+H -> G D C
+Simple-expression-zegond -> Additive-expression-zegond C
+Simple-expression-prime -> Additive-expression-prime C
+C -> Relop Additive-expression
+C -> EPSILON
+Relop -> <
+Relop -> ==
+Additive-expression -> Term D
+Additive-expression-prime -> Term-prime D
+Additive-expression-zegond -> Term-zegond D
+D -> Addop Term D
+D -> EPSILON
+Addop -> +
+Addop -> -
+Term -> Factor G
+Term-prime -> Factor-prime G
+Term-zegond -> Factor-zegond G
+G -> * Factor G
+G -> EPSILON
+Factor -> ( Expression )
+Factor -> ID Var-call-prime
+Factor -> NUM
+Var-call-prime -> ( Args )
+Var-call-prime -> Var-prime
+Var-prime -> [ Expression ]
+Var-prime -> EPSILON
+Factor-prime -> ( Args )
+Factor-prime -> EPSILON
+Factor-zegond -> ( Expression )
+Factor-zegond -> NUM
+Args -> Arg-list
+Args -> EPSILON
+Arg-list -> Expression Arg-list-prime
+Arg-list-prime -> , Expression Arg-list-prime
+Arg-list-prime -> EPSILON
