@@ -3,10 +3,13 @@ import operator
 
 # errors = open('syntax_errors.txt', 'w')
 # parse_tree = open('parse_tree.txt', 'w')
+import compiler
+
 non_terminals_set = set()
 terminals_set = set()
 ll1_table = {}
 grammar_production_rules = []
+states = []
 no_error = True
 
 
@@ -96,6 +99,7 @@ def set_first_and_follows():
 
 
 def initialize_diagrams():
+    global states
     cur_state = State('Program', 0)
     cur_state.children['Declaration-list'] = 1
     current_token = 'Program'
@@ -119,7 +123,7 @@ def initialize_diagrams():
             state_count_temp += 1
             cur_state.children[smt] = state_count_temp
 
-            cur_state = State(rule[0],state_count_temp)
+            cur_state = State(rule[0], state_count_temp)
             states.append(cur_state)
     for state in states:
         print(state.children, state.Non_terminal, state.value)
@@ -166,6 +170,19 @@ def create_table():
 #     errors.write(f'#{get_line_number()} : syntax error, {text}\n')
 #
 #
+def parse():
+    global all_nodes, head_node
+    stack = [head_node, states[0]]
+    scanner = compiler.LexicalAnalyzer()
+    current_token = scanner.get_next_token()
+    while True:
+        cur_nt, cur_state = stack[-2], stack[-1]
+        for child, number in cur_state.items():
+            if current_token[0] in child.firsts():
+                stack.append(child, number)
+
+
+
 # def ll1():
 #     global all_nodes, head_node
 #     stack = [head_node]
@@ -284,8 +301,8 @@ if __name__ == '__main__':
 
     head_node = TreeNode('Program')
     all_nodes = [head_node]
-    # ll1()
     initialize_diagrams()
+    parse()
 
     calculate_depth()
     all_nodes.sort(key=operator.attrgetter('depth'))
