@@ -1,4 +1,3 @@
-from scanner import *
 import re
 import operator
 
@@ -9,6 +8,17 @@ terminals_set = set()
 ll1_table = {}
 grammar_production_rules = []
 no_error = True
+
+
+class State:
+    def __init__(self, Non_terminal, children, has_epsilon=False):
+        self.Non_terminal = Non_terminal
+        self.children = children
+        self.has_epsilon = has_epsilon
+
+    def get_next_state(self, token):
+        # todo
+        pass
 
 
 class TreeNode:
@@ -82,6 +92,31 @@ def set_first_and_follows():
     for terminal in terminals_set:
         firsts[terminal] = {terminal}
     follows = convert_file_to_dict("Follows.txt")
+
+
+def initialize_diagrams():
+    current_token = grammar_production_rules[0][0]
+    cur_state = State('Program', {"Declaration-list: 1"})
+    state_count = 1
+    state_count_temp = 1
+    states = [cur_state]
+    for rule in grammar_production_rules:
+        if rule[0] == current_token:
+            cur_state = states[state_count]
+        else:
+            state_count = state_count_temp
+            cur_state = State(rule[0], {})
+            states.append(cur_state)
+
+        for smt in rule:
+            if smt == 'EPSILON':
+                cur_state.has_epsilon = True
+
+            cur_state.children[smt] = state_count_temp
+
+            cur_state = State(rule[0], {})
+            states.append(cur_state)
+            state_count_temp += 1
 
 
 def create_table():
@@ -241,6 +276,7 @@ if __name__ == '__main__':
     find_terminals_and_non_terminals()
     set_first_and_follows()
     create_table()
+    initialize_diagrams()
 
     head_node = TreeNode('Program')
     all_nodes = [head_node]
