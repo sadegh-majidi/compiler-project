@@ -1,0 +1,45 @@
+Additive-expression ) , ; EPSILON ]
+Additive-expression-prime < == EPSILON
+Additive-expression-zegond < == EPSILON
+Addop ( ID NUM
+Arg-list )
+Arg-list-prime )
+Args )
+B ) , ; EPSILON ]
+C ) , ; EPSILON ]
+Compound-stmt ( ; EPSILON ID NUM break else endif if int repeat return until void {
+D ) , ; < == EPSILON ]
+Declaration EPSILON int void
+Declaration-initial ( ; EPSILON [
+Declaration-list $ ( ; EPSILON ID NUM break if repeat return {
+Declaration-prime EPSILON int void
+Else-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
+Expression ) , ; EPSILON ]
+Expression-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
+Factor * EPSILON
+Factor-prime * EPSILON
+Factor-zegond * EPSILON
+Fun-declaration-prime EPSILON int void
+G + - EPSILON
+H ) , ; EPSILON ]
+Iteration-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
+Param , EPSILON
+Param-list )
+Param-prime , EPSILON
+Params )
+Program $
+Relop ( ID NUM
+Return-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
+Return-stmt-prime ( ; EPSILON ID NUM break else endif if repeat return until {
+Selection-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
+Simple-expression-prime ) , ; EPSILON ]
+Simple-expression-zegond ) , ; EPSILON ]
+Statement ( ; EPSILON ID NUM break else endif if repeat return until {
+Statement-list }
+Term + - EPSILON
+Term-prime + - EPSILON
+Term-zegond + - EPSILON
+Type-specifier ID
+Var-call-prime * EPSILON
+Var-declaration-prime EPSILON int void
+Var-prime * EPSILON
