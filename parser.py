@@ -146,7 +146,7 @@ def initialize_diagrams():
 #
 #
 def parse():
-    global all_nodes, head_node
+    global all_nodes, head_node,no_error
     stack = [head_node, states[0]]
     scanner = compiler.LexicalAnalyzer()
     current_token = scanner.get_next_token()
@@ -163,15 +163,17 @@ def parse():
                 pass
             elif 'EPSILON' in firsts[child] and current_token[0] in follows[cur_state.Non_terminal]:
                 pass
+            elif child == 'EPSILON' and current_token[0] in follows[cur_state.Non_terminal]:
+                pass
         if current_token[0] in follows[cur_state.Non_terminal]:
             # error 1
-            pass
+            no_error = False
         elif current_token[0] not in follows[cur_state.Non_terminal]:
             # error 2
-            pass
+            no_error = False
         else:
             # error 3
-            pass
+            no_error = False
 
 
 # def ll1():
