@@ -8,6 +8,8 @@ import compiler
 non_terminals_set = set()
 terminals_set = set()
 ll1_table = {}
+firsts = set()
+follows = set()
 grammar_production_rules = []
 states = []
 no_error = True
@@ -56,6 +58,10 @@ class TreeNode:
         if self.value == 'ε':
             return 'epsilon'
         return self.value
+
+
+head_node = TreeNode('Program')
+all_nodes = [head_node]
 
 
 def split_grammar_rules():
@@ -132,40 +138,6 @@ def initialize_diagrams():
         print(state.children, state.Non_terminal, state.value)
     print(count)
 
-def create_table():
-    global ll1_table
-
-    for non_terminal in non_terminals_set:
-        ll1_table[non_terminal] = {}
-
-    # handle firsts
-    rule_number = -1
-    for rule in grammar_production_rules:
-        rule_number += 1
-        non_terminal = rule[0]
-        for product in rule[1:]:
-            for terminal in firsts[product]:
-                if terminal != 'ε':
-                    ll1_table[non_terminal][terminal] = rule_number
-            if not 'ε' in firsts[product]:
-                break
-
-    # handle follows
-    rule_number = -1
-    for rule in grammar_production_rules:
-        rule_number += 1
-        non_terminal = rule[0]
-        if not 'ε' in firsts[non_terminal]:
-            continue
-        for terminal in follows[non_terminal]:
-            ll1_table[non_terminal][terminal] = rule_number
-
-    # handle synch
-    for non_terminal in non_terminals_set:
-        for terminal in follows[non_terminal]:
-            if terminal not in ll1_table[non_terminal]:
-                ll1_table[non_terminal][terminal] = 'synch'
-
 
 # def handle_error(text):
 #     global no_error, errors
@@ -180,9 +152,26 @@ def parse():
     current_token = scanner.get_next_token()
     while True:
         cur_nt, cur_state = stack[-2], stack[-1]
+        if cur_state.value == 1 and current_token[0] == '$':
+            break
+        if len(cur_state.children) == 0:
+            stack.pop()
+            stack.pop()
+            continue
         for child, number in cur_state.items():
-            if current_token[0] in child.firsts():
-                stack.append(child, number)
+            if current_token[0] in firsts[child]:
+                pass
+            elif 'EPSILON' in firsts[child] and current_token[0] in follows[cur_state.Non_terminal]:
+                pass
+        if current_token[0] in follows[cur_state.Non_terminal]:
+            # error 1
+            pass
+        elif current_token[0] not in follows[cur_state.Non_terminal]:
+            # error 2
+            pass
+        else:
+            # error 3
+            pass
 
 
 # def ll1():
@@ -300,8 +289,6 @@ if __name__ == '__main__':
     set_first_and_follows()
     # create_table()
 
-    head_node = TreeNode('Program')
-    all_nodes = [head_node]
     initialize_diagrams()
     parse()
 
