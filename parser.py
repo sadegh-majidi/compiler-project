@@ -103,14 +103,16 @@ def initialize_diagrams():
     cur_state = State('Program', 0)
     cur_state.children['Declaration-list'] = 1
     current_token = 'Program'
-    state_count = 2
-    state_count_temp = 2
+    state_count = 1
+    state_count_temp = 1
     states = [cur_state, State('Program', 1)]
     for rule in grammar_production_rules[1:]:
+        # print(rule)
         if rule[0] == current_token:
             cur_state = states[state_count]
+            # print(cur_state.Non_terminal, rule[0])
         else:
-            state_count = state_count_temp
+            state_count = state_count_temp = state_count_temp + 1
             cur_state = State(rule[0], state_count)
             states.append(cur_state)
             current_token = rule[0]
@@ -297,7 +299,6 @@ if __name__ == '__main__':
     find_terminals_and_non_terminals()
     set_first_and_follows()
     # create_table()
-    initialize_diagrams()
 
     head_node = TreeNode('Program')
     all_nodes = [head_node]
