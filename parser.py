@@ -107,10 +107,8 @@ def initialize_diagrams():
     state_count_temp = 1
     states = [cur_state, State('Program', 1)]
     for rule in grammar_production_rules[1:]:
-        # print(rule)
         if rule[0] == current_token:
             cur_state = states[state_count]
-            # print(cur_state.Non_terminal, rule[0])
         else:
             state_count = state_count_temp = state_count_temp + 1
             cur_state = State(rule[0], state_count)
@@ -124,12 +122,15 @@ def initialize_diagrams():
 
             state_count_temp += 1
             cur_state.children[smt] = state_count_temp
-
             cur_state = State(rule[0], state_count_temp)
             states.append(cur_state)
-    for state in states:
-        print(state.children, state.Non_terminal, state.value)
 
+    count = 0
+    for state in states:
+        if len(state.children) == 0:
+            count += 1
+        print(state.children, state.Non_terminal, state.value)
+    print(count)
 
 def create_table():
     global ll1_table
@@ -182,7 +183,6 @@ def parse():
         for child, number in cur_state.items():
             if current_token[0] in child.firsts():
                 stack.append(child, number)
-
 
 
 # def ll1():
