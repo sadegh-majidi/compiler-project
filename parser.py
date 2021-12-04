@@ -131,12 +131,12 @@ def initialize_diagrams():
             cur_state = State(rule[0], state_count_temp)
             states.append(cur_state)
 
-    count = 0
-    for state in states:
-        if len(state.children) == 0:
-            count += 1
-        print(state.children, state.Non_terminal, state.value)
-    print(count)
+    # count = 0
+    # for state in states:
+    #     if len(state.children) == 0:
+    #         count += 1
+    #     print(state.children, state.Non_terminal, state.value)
+    # print(count)
 
 
 # def handle_error(text):
@@ -148,14 +148,14 @@ def initialize_diagrams():
 
 def get_first_state(child):
     for i in range(len(states)):
-        if states[i].value == child:
+        if states[i].Non_terminal == child:
             return states[i]
 
 
 def parse():
     global all_nodes, head_node, no_error
     stack = [head_node, states[0]]
-    scanner = compiler.LexicalAnalyzer()
+    scanner = LexicalAnalyzer()
     current_token = scanner.get_next_token()
     while True:
         cur_nt, cur_state = stack[-2], stack[-1]
@@ -165,12 +165,17 @@ def parse():
             stack.pop()
             stack.pop()
             continue
+        if current_token[0] == 'KEYWORD' or current_token[0] == 'SYMBOL':
+            a = current_token[1]
+        else:
+            a = current_token[0]
         for child, number in cur_state.children.items():
-            if current_token[0] in firsts[child]:
+            if a in firsts[child]:
                 if child in terminals_set:
-                    cur_nt.add_child(TreeNode(child))
+                    cur_nt.add_child(TreeNode(current_token[1]))
                     stack.pop()
                     stack.pop()
+                    current_token = scanner.get_next_token()
                 else:
                     new_child = TreeNode(child)
                     cur_nt.add_child(new_child)
@@ -181,7 +186,7 @@ def parse():
                     stack.append(new_child)
                     stack.append(get_first_state(child))
                 break
-            elif 'EPSILON' in firsts[child] and current_token[0] in follows[cur_state.Non_terminal]:
+            elif 'EPSILON' in firsts[child] and child not in terminals_set and a in follows[cur_state.Non_terminal]:
                 new_child = TreeNode(child)
                 cur_nt.add_child(new_child)
                 stack.pop()
@@ -191,20 +196,21 @@ def parse():
                 stack.append(new_child)
                 stack.append(get_first_state(child))
                 break
-            elif child == 'EPSILON' and current_token[0] in follows[cur_state.Non_terminal]:
+            elif child == 'EPSILON' and a in follows[cur_state.Non_terminal]:
                 cur_nt.add_child(TreeNode(child))
                 stack.pop()
                 stack.pop()
+                current_token = scanner.get_next_token()
                 break
-        if current_token[0] in follows[cur_state.Non_terminal]:
-            # error 1
-            no_error = False
-        elif current_token[0] not in follows[cur_state.Non_terminal]:
-            # error 2
-            no_error = False
-        else:
-            # error 3
-            no_error = False
+        # if current_token[0] in follows[cur_state.Non_terminal]:
+        #     # error 1
+        #     no_error = False
+        # elif current_token[0] not in follows[cur_state.Non_terminal]:
+        #     # error 2
+        #     no_error = False
+        # else:
+        #     # error 3
+        #     no_error = False
 
 
 # def ll1():
@@ -316,20 +322,30 @@ horizontal_lines = [0]
 #         parse_tree.write(f'{node.show()}\n')
 
 
-if __name__ == '__main__':
-    sadegh_obi = compiler.LexicalAnalyzer()
-    print(sadegh_obi.get_next_token())
-    # split_grammar_rules()
-    # find_terminals_and_non_terminals()
-    # set_first_and_follows()
-    # # create_table()
-    #
-    # initialize_diagrams()
-    # parse()
-    #
-    # calculate_depth()
-    # all_nodes.sort(key=operator.attrgetter('depth'))
+def draw_tree(root):
+    if root is None:
+        return
+    for i in root.children:
+        print(i.value)
+        draw_tree(i)
 
-    # # draw_tree()
+
+if __name__ == '__main__':
+    from lexical_analyzer import LexicalAnalyzer
+    split_grammar_rules()
+    find_terminals_and_non_terminals()
+    set_first_and_follows()
+    # create_table()
+
+    initialize_diagrams()
+    parse()
+
+    calculate_depth()
+    all_nodes.sort(key=operator.attrgetter('depth'))
+    an = head_node
+
+
+
+    draw_tree(an)
     # if no_error:
     #     errors.write('There is no syntax error.')
