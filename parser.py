@@ -203,7 +203,6 @@ def parse():
                 cur_nt.add_child(TreeNode(child))
                 stack.pop()
                 stack.pop()
-                current_token = scanner.get_next_token()
                 break
         # if current_token[0] in follows[cur_state.Non_terminal]:
         #     # error 1
