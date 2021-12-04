@@ -158,6 +158,7 @@ def parse():
     scanner = LexicalAnalyzer()
     current_token = scanner.get_next_token()
     while True:
+        print(current_token)
         cur_nt, cur_state = stack[-2], stack[-1]
         if cur_state.value == 1 and current_token[0] == '$':
             break
@@ -175,6 +176,8 @@ def parse():
                     cur_nt.add_child(TreeNode(current_token[1]))
                     stack.pop()
                     stack.pop()
+                    stack.append(cur_nt)
+                    stack.append(states[number])
                     current_token = scanner.get_next_token()
                 else:
                     new_child = TreeNode(child)
