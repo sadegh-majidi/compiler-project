@@ -1,45 +1,45 @@
-Additive-expression ) , ; EPSILON ]
-Additive-expression-prime < == EPSILON
-Additive-expression-zegond < == EPSILON
+Additive-expression 	) , ; ]
+Additive-expression-prime ) , ; < == ]
+Additive-expression-zegond ) , ; < == ]
 Addop ( ID NUM
 Arg-list )
 Arg-list-prime )
 Args )
-B ) , ; EPSILON ]
-C ) , ; EPSILON ]
-Compound-stmt ( ; EPSILON ID NUM break else endif if int repeat return until void {
-D ) , ; < == EPSILON ]
-Declaration EPSILON int void
-Declaration-initial ( ; EPSILON [
-Declaration-list $ ( ; EPSILON ID NUM break if repeat return {
-Declaration-prime EPSILON int void
-Else-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
-Expression ) , ; EPSILON ]
-Expression-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
-Factor * EPSILON
-Factor-prime * EPSILON
-Factor-zegond * EPSILON
-Fun-declaration-prime EPSILON int void
-G + - EPSILON
-H ) , ; EPSILON ]
-Iteration-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
-Param , EPSILON
+B ) , ; ]
+C ) , ; ]
+Compound-stmt $ ( ; ID NUM break else endif if int repeat return until void { }
+D ) , ; < == ]
+Declaration $ ( ; ID NUM break if int repeat return void { }
+Declaration-initial ( ) , ; [
+Declaration-list $ ( ; ID NUM break if repeat return { }
+Declaration-prime $ ( ; ID NUM break if int repeat return void { }
+Else-stmt ( ; ID NUM break else endif if repeat return until { }
+Expression ) , ; ]
+Expression-stmt ( ; ID NUM break else endif if repeat return until { }
+Factor ) * + , - ; < == ]
+Factor-prime ) * + , - ; < == ]
+Factor-zegond ) * + , - ; < == ]
+Fun-declaration-prime $ ( ; ID NUM break if int repeat return void { }
+G ) + , - ; < == ]
+H ) , ; ]
+Iteration-stmt ( ; ID NUM break else endif if repeat return until { }
+Param ) ,
 Param-list )
-Param-prime , EPSILON
+Param-prime ) ,
 Params )
 Program $
 Relop ( ID NUM
-Return-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
-Return-stmt-prime ( ; EPSILON ID NUM break else endif if repeat return until {
-Selection-stmt ( ; EPSILON ID NUM break else endif if repeat return until {
-Simple-expression-prime ) , ; EPSILON ]
-Simple-expression-zegond ) , ; EPSILON ]
-Statement ( ; EPSILON ID NUM break else endif if repeat return until {
+Return-stmt ( ; ID NUM break else endif if repeat return until { }
+Return-stmt-prime ( ; ID NUM break else endif if repeat return until { }
+Selection-stmt ( ; ID NUM break else endif if repeat return until { }
+Simple-expression-prime ) , ; ]
+Simple-expression-zegond ) , ; ]
+Statement ( ; ID NUM break else endif if repeat return until { }
 Statement-list }
-Term + - EPSILON
-Term-prime + - EPSILON
-Term-zegond + - EPSILON
+Term ) + , - ; < == ]
+Term-prime ) + , - ; < == ]
+Term-zegond ) + , - ; < == ]
 Type-specifier ID
-Var-call-prime * EPSILON
-Var-declaration-prime EPSILON int void
-Var-prime * EPSILON
+Var-call-prime ) * + , - ; < == ]
+Var-declaration-prime $ ( ; ID NUM break if int repeat return void { }
+Var-prime 	) * + , - ; < == ]
