@@ -145,8 +145,15 @@ def initialize_diagrams():
 #     errors.write(f'#{get_line_number()} : syntax error, {text}\n')
 #
 #
+
+def get_first_state(child):
+    for i in range(len(states)):
+        if states[i].value == child:
+            return states[i]
+
+
 def parse():
-    global all_nodes, head_node,no_error
+    global all_nodes, head_node, no_error
     stack = [head_node, states[0]]
     scanner = compiler.LexicalAnalyzer()
     current_token = scanner.get_next_token()
@@ -158,13 +165,37 @@ def parse():
             stack.pop()
             stack.pop()
             continue
-        for child, number in cur_state.items():
+        for child, number in cur_state.children.items():
             if current_token[0] in firsts[child]:
-                pass
+                if child in terminals_set:
+                    cur_nt.add_child(TreeNode(child))
+                    stack.pop()
+                    stack.pop()
+                else:
+                    new_child = TreeNode(child)
+                    cur_nt.add_child(new_child)
+                    stack.pop()
+                    stack.pop()
+                    stack.append(cur_nt)
+                    stack.append(states[number])
+                    stack.append(new_child)
+                    stack.append(get_first_state(child))
+                break
             elif 'EPSILON' in firsts[child] and current_token[0] in follows[cur_state.Non_terminal]:
-                pass
+                new_child = TreeNode(child)
+                cur_nt.add_child(new_child)
+                stack.pop()
+                stack.pop()
+                stack.append(cur_nt)
+                stack.append(states[number])
+                stack.append(new_child)
+                stack.append(get_first_state(child))
+                break
             elif child == 'EPSILON' and current_token[0] in follows[cur_state.Non_terminal]:
-                pass
+                cur_nt.add_child(TreeNode(child))
+                stack.pop()
+                stack.pop()
+                break
         if current_token[0] in follows[cur_state.Non_terminal]:
             # error 1
             no_error = False
@@ -286,16 +317,18 @@ horizontal_lines = [0]
 
 
 if __name__ == '__main__':
-    split_grammar_rules()
-    find_terminals_and_non_terminals()
-    set_first_and_follows()
-    # create_table()
-
-    initialize_diagrams()
-    parse()
-
-    calculate_depth()
-    all_nodes.sort(key=operator.attrgetter('depth'))
+    sadegh_obi = compiler.LexicalAnalyzer()
+    print(sadegh_obi.get_next_token())
+    # split_grammar_rules()
+    # find_terminals_and_non_terminals()
+    # set_first_and_follows()
+    # # create_table()
+    #
+    # initialize_diagrams()
+    # parse()
+    #
+    # calculate_depth()
+    # all_nodes.sort(key=operator.attrgetter('depth'))
 
     # # draw_tree()
     # if no_error:
