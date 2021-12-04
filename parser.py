@@ -189,7 +189,7 @@ def parse():
                     stack.append(new_child)
                     stack.append(get_first_state(child))
                 break
-            elif 'EPSILON' in firsts[child] and child not in terminals_set and a in follows[cur_state.Non_terminal]:
+            elif 'EPSILON' in firsts[child] and child not in terminals_set and a in follows[child]:
                 new_child = TreeNode(child)
                 cur_nt.add_child(new_child)
                 stack.pop()

@@ -1,4 +1,4 @@
-Additive-expression 	) , ; ]
+Additive-expression ) , ; ]
 Additive-expression-prime ) , ; < == ]
 Additive-expression-zegond ) , ; < == ]
 Addop ( ID NUM
