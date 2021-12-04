@@ -1,5 +1,6 @@
 import re
 import operator
+from anytree import Node, RenderTree
 
 # errors = open('syntax_errors.txt', 'w')
 # parse_tree = open('parse_tree.txt', 'w')
@@ -139,13 +140,6 @@ def initialize_diagrams():
     # print(count)
 
 
-# def handle_error(text):
-#     global no_error, errors
-#     no_error = False
-#     errors.write(f'#{get_line_number()} : syntax error, {text}\n')
-#
-#
-
 def get_first_state(child):
     for i in range(len(states)):
         if states[i].Non_terminal == child:
@@ -158,10 +152,7 @@ def parse():
     scanner = LexicalAnalyzer()
     current_token = scanner.get_next_token()
     while True:
-        print(current_token)
         cur_nt, cur_state = stack[-2], stack[-1]
-        if cur_state.Non_terminal == 'Iteration-stmt':
-            print("asdsad")
 
         if cur_state.value == 1 and current_token[0] == '$':
             break
@@ -176,7 +167,7 @@ def parse():
         for child, number in cur_state.children.items():
             if a in firsts[child]:
                 if child in terminals_set:
-                    cur_nt.add_child(TreeNode(current_token[1], parent=cur_nt))
+                    cur_nt.add_child(TreeNode("({}, {})".format(current_token[0], current_token[1]), parent=cur_nt))
                     stack.pop()
                     stack.pop()
                     stack.append(cur_nt)
@@ -204,7 +195,7 @@ def parse():
                 break
 
             elif child == 'EPSILON' and a in follows[cur_state.Non_terminal]:
-                cur_nt.add_child(TreeNode(child,parent = cur_nt))
+                cur_nt.add_child(TreeNode('epsilon', parent=cur_nt))
                 stack.pop()
                 stack.pop()
                 break
@@ -217,76 +208,6 @@ def parse():
         # else:
         #     # error 3
         #     no_error = False
-
-
-# def ll1():
-#     global all_nodes, head_node
-#     stack = [head_node]
-#     current_token = get_next_token()
-#     is_EOF_error = False
-#     while True:
-#         X_node = stack[len(stack) - 1]
-#         X = X_node.value
-#
-#         if current_token[0] == 'SYMBOL':
-#             a = current_token[1]
-#         elif current_token[0] == 'ID':
-#             a = current_token[0]
-#         elif current_token[0] == 'KEYWORD':
-#             a = current_token[1]
-#         elif current_token[0] == 'NUM':
-#             a = current_token[0]
-#         elif current_token == '$':
-#             a = current_token
-#
-#         if X == 'ε':
-#             stack.pop()
-#         elif X == a and a == '$':
-#             break
-#         elif X == a and X in terminals_set:
-#             stack.pop()
-#             X_node.set_token(current_token)
-#             current_token = get_next_token()
-#         elif X != a and X in terminals_set:
-#             handle_error('missing ' + X)
-#             node = stack.pop()
-#             all_nodes.remove(node)
-#             try:
-#                 node.parent.children.remove(node)
-#             except:
-#                 pass
-#         elif a not in ll1_table[X]:
-#             if a == '$':
-#                 handle_error('unexpected EOF')
-#                 is_EOF_error = True
-#                 break
-#             handle_error('illegal ' + a)
-#             current_token = get_next_token()
-#         elif ll1_table[X][a] == 'synch':
-#             handle_error('missing ' + X)
-#             node = stack.pop()
-#             all_nodes.remove(node)
-#             try:
-#                 node.parent.children.remove(node)
-#             except:
-#                 pass
-#         else:
-#             rule = grammar_production_rules[ll1_table[X][a]]
-#             node = stack.pop()
-#             for index in range(len(rule) - 1, 0, -1):
-#                 new_node = TreeNode(rule[index], parent=node)
-#                 all_nodes.append(new_node)
-#                 stack.append(new_node)
-#                 node.add_child(new_node)
-#
-#     for node in stack:
-#         if node.value == '$' and not is_EOF_error:
-#             continue
-#         all_nodes.remove(node)
-#         try:
-#             node.parent.children.remove(node)
-#         except:
-#             pass
 
 
 def calculate_depth():
@@ -307,37 +228,10 @@ def calculate_depth():
     visit(head_node)
 
 
-horizontal_lines = [0]
 
-# def draw_tree():
-#     global horizontal_lines
-#     for node in all_nodes:
-#         for child in node.children:
-#             horizontal_lines.append(child.width)
-#         for counter in range(0, node.width - 1):
-#             if counter + 1 in horizontal_lines:
-#                 parse_tree.write('│   ')
-#             else:
-#                 parse_tree.write('    ')
-#         if node.width != 0:
-#             if node == node.parent.children[0]:
-#                 parse_tree.write('└── ')
-#             else:
-#                 parse_tree.write('├── ')
-#         horizontal_lines.remove(node.width)
-#         parse_tree.write(f'{node.show()}\n')
-
-count = 0
-
-
-def draw_tree(root):
-    global count
-    count += 1
-    if root is None:
-        return
-    for i in root.children:
-        print(i.value)
-        draw_tree(i)
+def drawTree(root, new_root):
+    for child in root.children:
+        drawTree(child, Node(child.value, parent=new_root))
 
 
 if __name__ == '__main__':
@@ -346,19 +240,16 @@ if __name__ == '__main__':
     split_grammar_rules()
     find_terminals_and_non_terminals()
     set_first_and_follows()
-    # create_table()
 
     initialize_diagrams()
-    # print('EPSILON' in firsts['Var-prime'])
-    # print('Var-prime' not in terminals_set)
-    # print(')' in follows['Var-prime'])
     parse()
 
     calculate_depth()
     all_nodes.sort(key=operator.attrgetter('depth'))
-    an = head_node
-
-    draw_tree(an)
-    print(count)
+    head_print_node = Node(head_node.value)
+    drawTree(head_node, head_print_node)
+    Node('$', parent=head_print_node)
+    for pre, fill, node in RenderTree(head_print_node):
+        print("%s%s" % (pre, node.name))
     # if no_error:
     #     errors.write('There is no syntax error.')
