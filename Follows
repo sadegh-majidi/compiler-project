@@ -42,4 +42,4 @@ Term-zegond ) + , - ; < == ]
 Type-specifier ID
 Var-call-prime ) * + , - ; < == ]
 Var-declaration-prime $ ( ; ID NUM break if int repeat return void { }
-Var-prime 	) * + , - ; < == ]
+Var-prime ) * + , - ; < == ]
