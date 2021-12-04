@@ -1,11 +1,11 @@
 Additive-expression ( ID NUM
-Additive-expression-prime ( EPSILON
+Additive-expression-prime ( * + - EPSILON
 Additive-expression-zegond ( NUM
 Addop + -
 Arg-list ( ID NUM
 Arg-list-prime , EPSILON
 Args ( EPSILON ID NUM
-B ( = EPSILON [
+B ( * + - < = == [ EPSILON
 C < == EPSILON
 Compound-stmt {
 D + - EPSILON
@@ -21,7 +21,7 @@ Factor-prime ( EPSILON
 Factor-zegond ( NUM
 Fun-declaration-prime (
 G * EPSILON
-H * = EPSILON
+H * + - < = == EPSILON
 Iteration-stmt repeat
 Param int void
 Param-list , EPSILON
@@ -32,12 +32,12 @@ Relop < ==
 Return-stmt return
 Return-stmt-prime ( ; ID NUM
 Selection-stmt if
-Simple-expression-prime ( EPSILON
+Simple-expression-prime ( * + - < == EPSILON
 Simple-expression-zegond ( NUM
 Statement ( ; ID NUM break if repeat return {
-Statement-list ( ; EPSILON ID NUM break if repeat return {
+Statement-list ( ; ID NUM break if repeat return { EPSILON
 Term ( ID NUM
-Term-prime ( EPSILON
+Term-prime ( * EPSILON
 Term-zegond ( NUM
 Type-specifier int void
 Var-call-prime ( EPSILON [
