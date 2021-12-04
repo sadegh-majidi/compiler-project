@@ -16,7 +16,3 @@ class UnclosedCommentError(Exception):
 
 class UnmatchedCommentError(Exception):
     pass
-
-
-class InputProgramFinishedException(Exception):
-    pass
