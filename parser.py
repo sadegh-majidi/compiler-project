@@ -60,7 +60,7 @@ class TreeNode:
         return self.value
 
 
-head_node = TreeNode('Program')
+head_node = TreeNode('Program', parent=None)
 all_nodes = [head_node]
 
 
@@ -160,6 +160,9 @@ def parse():
     while True:
         print(current_token)
         cur_nt, cur_state = stack[-2], stack[-1]
+        if cur_state.Non_terminal == 'Iteration-stmt':
+            print("asdsad")
+
         if cur_state.value == 1 and current_token[0] == '$':
             break
         if len(cur_state.children) == 0:
@@ -173,14 +176,14 @@ def parse():
         for child, number in cur_state.children.items():
             if a in firsts[child]:
                 if child in terminals_set:
-                    cur_nt.add_child(TreeNode(current_token[1]))
+                    cur_nt.add_child(TreeNode(current_token[1], parent=cur_nt))
                     stack.pop()
                     stack.pop()
                     stack.append(cur_nt)
                     stack.append(states[number])
                     current_token = scanner.get_next_token()
                 else:
-                    new_child = TreeNode(child)
+                    new_child = TreeNode(child, parent=cur_nt)
                     cur_nt.add_child(new_child)
                     stack.pop()
                     stack.pop()
@@ -190,7 +193,7 @@ def parse():
                     stack.append(get_first_state(child))
                 break
             elif 'EPSILON' in firsts[child] and child not in terminals_set and a in follows[child]:
-                new_child = TreeNode(child)
+                new_child = TreeNode(child, parent=cur_nt)
                 cur_nt.add_child(new_child)
                 stack.pop()
                 stack.pop()
@@ -199,8 +202,9 @@ def parse():
                 stack.append(new_child)
                 stack.append(get_first_state(child))
                 break
+
             elif child == 'EPSILON' and a in follows[cur_state.Non_terminal]:
-                cur_nt.add_child(TreeNode(child))
+                cur_nt.add_child(TreeNode(child,parent = cur_nt))
                 stack.pop()
                 stack.pop()
                 break
@@ -323,8 +327,12 @@ horizontal_lines = [0]
 #         horizontal_lines.remove(node.width)
 #         parse_tree.write(f'{node.show()}\n')
 
+count = 0
+
 
 def draw_tree(root):
+    global count
+    count += 1
     if root is None:
         return
     for i in root.children:
@@ -334,20 +342,23 @@ def draw_tree(root):
 
 if __name__ == '__main__':
     from lexical_analyzer import LexicalAnalyzer
+
     split_grammar_rules()
     find_terminals_and_non_terminals()
     set_first_and_follows()
     # create_table()
 
     initialize_diagrams()
+    # print('EPSILON' in firsts['Var-prime'])
+    # print('Var-prime' not in terminals_set)
+    # print(')' in follows['Var-prime'])
     parse()
 
     calculate_depth()
     all_nodes.sort(key=operator.attrgetter('depth'))
     an = head_node
 
-
-
     draw_tree(an)
+    print(count)
     # if no_error:
     #     errors.write('There is no syntax error.')
