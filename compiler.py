@@ -5,12 +5,22 @@ from state import REGEX
 
 class ErrorHandler:
     has_lexical_error = False
+    has_unexpected_eof = False
     line_number = 0
 
     INVALID_INPUT = 'Invalid input'
     INVALID_NUMBER = 'Invalid number'
     UNCLOSED_COMMENT = 'Unclosed comment'
     UNMATCHED_COMMENT = 'Unmatched comment'
+
+    UNEXPECTED = 'Unexpected'
+    MISSING = 'missing'
+    ILLEGAL = 'illegal'
+
+    @staticmethod
+    def write_syntax_error(line_number: int, error_type: str, token: str):
+        with open('syntax_errors.txt', 'a') as f:
+            f.write(f'#{line_number} : syntax error, {error_type} {token}\n')
 
     @staticmethod
     def write_lexical_error(line_number: int, error_type: str, error_message: str):
@@ -50,19 +60,5 @@ class SymbolTableHandler:
 
 
 if __name__ == '__main__':
-    from lexical_analyzer import LexicalAnalyzer
-    lexical_analyser = LexicalAnalyzer()
-    line = 0
-    while True:
-        x = lexical_analyser.get_next_token()
-        print(x)
-        with open('tokens.txt', 'a') as f:
-            if line != lexical_analyser.line_number:
-                if line != 0:
-                    f.write('\n')
-                f.write(f'{lexical_analyser.line_number}.\t')
-                line = lexical_analyser.line_number
-
-            f.write(f'({x[0]}, {x[1]}) ')
-        if x == ('$', '$'):
-            break
+    from parser import scan_and_parse
+    scan_and_parse()
