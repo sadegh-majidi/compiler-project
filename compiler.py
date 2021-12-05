@@ -67,5 +67,5 @@ class SymbolTableHandler:
 
 
 if __name__ == '__main__':
-    from parser import scan_and_parse
+    from parser_2 import scan_and_parse
     scan_and_parse()
