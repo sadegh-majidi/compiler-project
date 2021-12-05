@@ -63,7 +63,7 @@ all_nodes = [head_node]
 
 def split_grammar_rules():
     global grammar_production_rules
-    grammar = open('grammar_rules', 'r').read()
+    grammar = open('First & Follow/grammar_rules', 'r').read()
     grammar_production_rules = re.split('\n', grammar)
     for i in range(0, len(grammar_production_rules)):
         grammar_production_rules[i] = re.split(' -> | ', grammar_production_rules[i])
@@ -95,10 +95,10 @@ def convert_file_to_dict(file):
 
 def set_first_and_follows():
     global firsts, follows
-    firsts = convert_file_to_dict("Firsts")
+    firsts = convert_file_to_dict("First & Follow/Firsts")
     for terminal in terminals_set:
         firsts[terminal] = {terminal}
-    follows = convert_file_to_dict("Follows")
+    follows = convert_file_to_dict("First & Follow/Follows")
 
 
 def initialize_diagrams():
@@ -257,7 +257,7 @@ def scan_and_parse():
     if not ErrorHandler.has_unexpected_eof:
         Node('$', parent=head_print_node)
 
-    with open('parse_tree.txt', 'w') as f:
+    with open('parse_tree.txt', 'w',encoding= "utf-8") as f:
         x = True
         for pre, fill, node in RenderTree(head_print_node):
             if x:

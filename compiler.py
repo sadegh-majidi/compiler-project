@@ -20,13 +20,8 @@ class ErrorHandler:
 
     @staticmethod
     def write_syntax_error(line_number: int, error_type: str, token: str):
-        if not ErrorHandler.has_syntax_error:
-            ErrorHandler.has_syntax_error = True
-            with open('syntax_errors.txt', 'a') as f:
-                f.write(f'#{line_number} : syntax error, {error_type} {token}')
-        else:
-            with open('syntax_errors.txt', 'a') as f:
-                f.write(f'\n#{line_number} : syntax error, {error_type} {token}')
+        with open('syntax_errors.txt', 'a') as f:
+            f.write(f"#{line_number} : syntax error, {error_type} {token}\n")
 
 
     @staticmethod
