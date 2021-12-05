@@ -1,16 +1,16 @@
-import re
 import operator
+import re
+
 from anytree import Node, RenderTree
 
-# errors = open('syntax_errors.txt', 'w')
-# parse_tree = open('parse_tree.txt', 'w')
-import compiler
+from compiler import ErrorHandler
+from lexical_analyzer import LexicalAnalyzer
 
 non_terminals_set = set()
 terminals_set = set()
 ll1_table = {}
-firsts = set()
-follows = set()
+firsts = dict()
+follows = dict()
 grammar_production_rules = []
 states = []
 no_error = True
@@ -22,10 +22,6 @@ class State:
         self.children = dict()
         self.has_epsilon = has_epsilon
         self.value = value
-
-    def get_next_state(self, token):
-        # todo
-        pass
 
 
 class TreeNode:
@@ -132,13 +128,6 @@ def initialize_diagrams():
             cur_state = State(rule[0], state_count_temp)
             states.append(cur_state)
 
-    # count = 0
-    # for state in states:
-    #     if len(state.children) == 0:
-    #         count += 1
-    #     print(state.children, state.Non_terminal, state.value)
-    # print(count)
-
 
 def get_first_state(child):
     for i in range(len(states)):
@@ -199,15 +188,32 @@ def parse():
                 stack.pop()
                 stack.pop()
                 break
-        # if current_token[0] in follows[cur_state.Non_terminal]:
-        #     # error 1
-        #     no_error = False
-        # elif current_token[0] not in follows[cur_state.Non_terminal]:
-        #     # error 2
-        #     no_error = False
-        # else:
-        #     # error 3
-        #     no_error = False
+
+        else:
+            no_error = False
+            child = list(cur_state.children.items())[0]
+            child_state = states[child[1]]
+
+            if child[0] in terminals_set and child[0] != a and a != '$':
+                stack.pop()
+                stack.pop()
+                stack.append(cur_nt)
+                stack.append(child_state)
+                ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.MISSING, list(cur_state.children.keys())[0])
+            elif a in follows[child[0]]:
+                stack.pop()
+                stack.pop()
+                stack.append(cur_nt)
+                stack.append(child_state)
+                ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.MISSING, child[0])
+            else:
+                if a == '$':
+                    ErrorHandler.has_unexpected_eof = True
+                    ErrorHandler.write_syntax_error(scanner.line_number + 1, ErrorHandler.UNEXPECTED, 'EOF')
+                    break
+                else:
+                    ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.ILLEGAL, a)
+                    current_token = scanner.get_next_token()
 
 
 def calculate_depth():
@@ -234,9 +240,7 @@ def drawTree(root, new_root):
         drawTree(child, Node(child.value, parent=new_root))
 
 
-if __name__ == '__main__':
-    from lexical_analyzer import LexicalAnalyzer
-
+def scan_and_parse():
     split_grammar_rules()
     find_terminals_and_non_terminals()
     set_first_and_follows()
@@ -248,8 +252,14 @@ if __name__ == '__main__':
     all_nodes.sort(key=operator.attrgetter('depth'))
     head_print_node = Node(head_node.value)
     drawTree(head_node, head_print_node)
-    Node('$', parent=head_print_node)
-    for pre, fill, node in RenderTree(head_print_node):
-        print("%s%s" % (pre, node.name))
-    # if no_error:
-    #     errors.write('There is no syntax error.')
+
+    if not ErrorHandler.has_unexpected_eof:
+        Node('$', parent=head_print_node)
+
+    with open('parse_tree.txt', 'w') as f:
+        for pre, fill, node in RenderTree(head_print_node):
+            f.write('%s%s\n' % (pre, node.name))
+
+    if no_error:
+        with open('syntax_errors.txt', 'w') as f:
+            f.write('There is no syntax error.')
