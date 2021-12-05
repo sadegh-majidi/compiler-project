@@ -5,6 +5,7 @@ from state import REGEX
 
 class ErrorHandler:
     has_lexical_error = False
+    has_syntax_error = False
     has_unexpected_eof = False
     line_number = 0
 
@@ -19,8 +20,14 @@ class ErrorHandler:
 
     @staticmethod
     def write_syntax_error(line_number: int, error_type: str, token: str):
-        with open('syntax_errors.txt', 'a') as f:
-            f.write(f'#{line_number} : syntax error, {error_type} {token}\n')
+        if not ErrorHandler.has_syntax_error:
+            ErrorHandler.has_syntax_error = True
+            with open('syntax_errors.txt', 'a') as f:
+                f.write(f'#{line_number} : syntax error, {error_type} {token}')
+        else:
+            with open('syntax_errors.txt', 'a') as f:
+                f.write(f'\n#{line_number} : syntax error, {error_type} {token}')
+
 
     @staticmethod
     def write_lexical_error(line_number: int, error_type: str, error_message: str):
