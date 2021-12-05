@@ -209,7 +209,8 @@ def parse():
             else:
                 if a == '$':
                     ErrorHandler.has_unexpected_eof = True
-                    ErrorHandler.write_syntax_error(scanner.line_number + 1, ErrorHandler.UNEXPECTED, 'EOF')
+                    line_num = scanner.input.count('\n')
+                    ErrorHandler.write_syntax_error(line_num + 1, ErrorHandler.UNEXPECTED, 'EOF')
                     break
                 else:
                     ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.ILLEGAL, a)
@@ -257,8 +258,13 @@ def scan_and_parse():
         Node('$', parent=head_print_node)
 
     with open('parse_tree.txt', 'w') as f:
+        x = True
         for pre, fill, node in RenderTree(head_print_node):
-            f.write('%s%s\n' % (pre, node.name))
+            if x:
+                f.write('%s%s' % (pre, node.name))
+                x = False
+            else:
+                f.write('\n%s%s' % (pre, node.name))
 
     if no_error:
         with open('syntax_errors.txt', 'w') as f:
