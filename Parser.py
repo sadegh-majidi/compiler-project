@@ -25,36 +25,13 @@ class State:
 
 
 class TreeNode:
-    def __init__(self, value, width=0, parent=None):
+    def __init__(self, value, parent=None):
         self.parent = parent
         self.value = value
         self.children = []
-        self.width = width
-        self.depth = 0
-        self.height = 0
-        self.is_terminal = False
-        self.token = None
 
     def add_child(self, child):
         self.children.append(child)
-        child.width = self.width + 1
-
-    def is_leave(self):
-        return len(self.children) == 0
-
-    def __str__(self):
-        return str(self.value) + " " + str(self.width) + " " + str(self.depth)
-
-    def set_token(self, token):
-        self.token = token
-        self.is_terminal = True
-
-    def show(self):
-        if self.is_terminal:
-            return "(" + self.token[0] + ", " + self.token[1] + ") "
-        if self.value == 'ε':
-            return 'epsilon'
-        return self.value
 
 
 head_node = TreeNode('Program', parent=None)
@@ -63,7 +40,7 @@ all_nodes = [head_node]
 
 def split_grammar_rules():
     global grammar_production_rules
-    grammar = open('First & Follow/grammar_rules', 'r').read()
+    grammar = open('grammar_rules.txt', 'r').read()
     grammar_production_rules = re.split('\n', grammar)
     for i in range(0, len(grammar_production_rules)):
         grammar_production_rules[i] = re.split(' -> | ', grammar_production_rules[i])
@@ -95,10 +72,10 @@ def convert_file_to_dict(file):
 
 def set_first_and_follows():
     global firsts, follows
-    firsts = convert_file_to_dict("First & Follow/Firsts")
+    firsts = convert_file_to_dict("Firsts.txt")
     for terminal in terminals_set:
         firsts[terminal] = {terminal}
-    follows = convert_file_to_dict("First & Follow/Follows")
+    follows = convert_file_to_dict("Follows.txt")
 
 
 def initialize_diagrams():
@@ -199,7 +176,8 @@ def parse():
                 stack.pop()
                 stack.append(cur_nt)
                 stack.append(child_state)
-                ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.MISSING, list(cur_state.children.keys())[0])
+                ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.MISSING,
+                                                list(cur_state.children.keys())[0])
             elif a in follows[child[0]]:
                 stack.pop()
                 stack.pop()
@@ -217,25 +195,6 @@ def parse():
                     current_token = scanner.get_next_token()
 
 
-def calculate_depth():
-    global head_node
-
-    def visit(node):
-        if node.is_leave():
-            return
-        depth = node.depth + 1
-        node.height = 0
-        for index in range(len(node.children) - 1, -1, -1):
-            child = node.children[index]
-            child.depth = depth
-            visit(child)
-            depth += child.height + 1
-            node.height += child.height + 1
-
-    visit(head_node)
-
-
-
 def drawTree(root, new_root):
     for child in root.children:
         drawTree(child, Node(child.value, parent=new_root))
@@ -248,16 +207,13 @@ def scan_and_parse():
 
     initialize_diagrams()
     parse()
-
-    calculate_depth()
-    all_nodes.sort(key=operator.attrgetter('depth'))
     head_print_node = Node(head_node.value)
     drawTree(head_node, head_print_node)
 
     if not ErrorHandler.has_unexpected_eof:
         Node('$', parent=head_print_node)
 
-    with open('parse_tree.txt', 'w',encoding= "utf-8") as f:
+    with open('parse_tree.txt', 'w', encoding="utf-8") as f:
         x = True
         for pre, fill, node in RenderTree(head_print_node):
             if x:
