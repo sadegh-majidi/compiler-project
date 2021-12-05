@@ -1,3 +1,6 @@
+# Arya Jalali 98105665
+# Sadegh Majidi Yazdi 98106004
+
 import re
 
 from state import REGEX
@@ -22,7 +25,6 @@ class ErrorHandler:
     def write_syntax_error(line_number: int, error_type: str, token: str):
         with open('syntax_errors.txt', 'a') as f:
             f.write(f"#{line_number} : syntax error, {error_type} {token}\n")
-
 
     @staticmethod
     def write_lexical_error(line_number: int, error_type: str, error_message: str):
@@ -62,5 +64,6 @@ class SymbolTableHandler:
 
 
 if __name__ == '__main__':
-    from parser_2 import scan_and_parse
+    from Parser import scan_and_parse
+
     scan_and_parse()
