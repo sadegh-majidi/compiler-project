@@ -1,4 +1,3 @@
-import operator
 import re
 
 from anytree import Node, RenderTree
@@ -8,7 +7,6 @@ from lexical_analyzer import LexicalAnalyzer
 
 non_terminals_set = set()
 terminals_set = set()
-ll1_table = {}
 firsts = dict()
 follows = dict()
 grammar_production_rules = []
@@ -35,7 +33,6 @@ class TreeNode:
 
 
 head_node = TreeNode('Program', parent=None)
-all_nodes = [head_node]
 
 
 def split_grammar_rules():
@@ -113,7 +110,7 @@ def get_first_state(child):
 
 
 def parse():
-    global all_nodes, head_node, no_error
+    global head_node, no_error
     stack = [head_node, states[0]]
     scanner = LexicalAnalyzer()
     current_token = scanner.get_next_token()
@@ -223,5 +220,5 @@ def scan_and_parse():
                 f.write('\n%s%s' % (pre, node.name))
 
     if no_error:
-        with open('syntax_errors.txt', 'w') as f:
+        with open('syntax_errors.txt', 'w', encoding="utf-8") as f:
             f.write('There is no syntax error.')
