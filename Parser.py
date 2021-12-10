@@ -11,6 +11,7 @@ firsts = dict()
 follows = dict()
 grammar_production_rules = []
 states = []
+write_dollar = True
 no_error = True
 
 
@@ -110,7 +111,7 @@ def get_first_state(child):
 
 
 def parse():
-    global head_node, no_error
+    global head_node, no_error, write_dollar
     stack = [head_node, states[0]]
     scanner = LexicalAnalyzer()
     current_token = scanner.get_next_token()
@@ -118,6 +119,12 @@ def parse():
         cur_nt, cur_state = stack[-2], stack[-1]
 
         if cur_state.value == 1 and current_token[0] == '$':
+            break
+        if cur_state.value == 1 and current_token != '$':
+            ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.MISSING,
+                                            '$')
+            no_error = False
+            write_dollar = False
             break
         if len(cur_state.children) == 0:
             stack.pop()
@@ -207,7 +214,7 @@ def scan_and_parse():
     head_print_node = Node(head_node.value)
     drawTree(head_node, head_print_node)
 
-    if not ErrorHandler.has_unexpected_eof:
+    if not ErrorHandler.has_unexpected_eof and write_dollar:
         Node('$', parent=head_print_node)
 
     with open('parse_tree.txt', 'w', encoding="utf-8") as f:
