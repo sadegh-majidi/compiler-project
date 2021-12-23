@@ -29,7 +29,7 @@ Expression-stmt -> Expression ;
 Expression-stmt -> break ;
 Expression-stmt -> ;
 Selection-stmt -> if ( Expression ) Statement Else-stmt
-Else-stmt -> endif |
+Else-stmt -> endif
 Else-stmt -> else Statement endif
 Iteration-stmt -> repeat Statement until ( Expression )
 Return-stmt -> return Return-stmt-prime
