@@ -2,21 +2,21 @@ Program -> Declaration-list $
 Declaration-list -> Declaration Declaration-list
 Declaration-list -> EPSILON
 Declaration -> Declaration-initial Declaration-prime
-Declaration-initial -> @SAVE_TYPE Type-specifier @ASSIGN_TYPE ID
-Declaration-prime -> @ASSIGN_FUN_ROLE Fun-declaration-prime
-Declaration-prime -> @ASSIGN_VAR_ROLE Var-declaration-prime
-Var-declaration-prime -> @ASSIGN_LENGTH ;
-Var-declaration-prime -> [ @ASSIGN_LENGTH NUM ] ;
-Fun-declaration-prime -> ( @INC_SCOPE Params @ASSIGN_FUN_ATTRS ) Compound-stmt #CALC_STACKFRAME_SIZE #RETURN_SEQ_CALLEE @DEC_SCOPE
+Declaration-initial -> @save_type Type-specifier @assign_type ID
+Declaration-prime -> @assign_fun_role Fun-declaration-prime
+Declaration-prime -> @assign_var_role Var-declaration-prime
+Var-declaration-prime -> @assign_length ;
+Var-declaration-prime -> [ @assign_length NUM ] ;
+Fun-declaration-prime -> ( @inc_scope Params @assign_fun_attrs ) Compound-stmt #calc_stackframe_size #return_seq_callee @dec_scope
 Type-specifier -> int
 Type-specifier -> void
-Params -> @SAVE_TYPE @SAVE_PARAM int @ASSIGN_TYPE ID @ASSIGN_PARAM_ROLE Param-prime Param-list
+Params -> @save_type @save_param int @assign_type ID @assign_param_role Param-prime Param-list
 Params -> void
-Param-list -> , @SAVE_PARAM Param Param-list
+Param-list -> , @save_param Param Param-list
 Param-list -> EPSILON
-Param -> Declaration-initial @ASSIGN_PARAM_ROLE Param-prime
-Param-prime -> @ASSIGN_LENGTH [ ]
-Param-prime -> @ASSIGN_LENGTH EPSILON
+Param -> Declaration-initial @assign_param_role Param-prime
+Param-prime -> @assign_length [ ]
+Param-prime -> @assign_length EPSILON
 Compound-stmt -> { Declaration-list Statement-list }
 Statement-list -> Statement Statement-list
 Statement-list -> EPSILON
@@ -25,54 +25,54 @@ Statement -> Compound-stmt
 Statement -> Selection-stmt
 Statement -> Iteration-stmt
 Statement -> Return-stmt
-Expression-stmt -> Expression #CLOSE_STMT ;
-Expression-stmt -> @CHECK_BREAK #BREAK_JP_SAVE break ;
+Expression-stmt -> Expression #close_stmt ;
+Expression-stmt -> @check_break #break_jp_save break ;
 Expression-stmt -> ;
-Selection-stmt -> if ( Expression ) #SAVE Statement Else-stmt
-Else-stmt -> endif #ENDIF
-Else-stmt -> else #ELSE Statement endif #IF_ELSE
-Iteration-stmt -> @PUSH_UNTIL repeat #LABEL Statement until ( Expression ) #UNTIL @POP_UNTIL
-Return-stmt -> return Return-stmt-prime #SET_RETVAL #RETURN_SEQ_CALLEE
+Selection-stmt -> if ( Expression ) #save Statement Else-stmt
+Else-stmt -> endif #endif
+Else-stmt -> else #else Statement endif #if_else
+Iteration-stmt -> @push_until repeat #label Statement until ( Expression ) #until @pop_until
+Return-stmt -> return Return-stmt-prime #set_retval #return_seq_callee
 Return-stmt-prime -> ;
 Return-stmt-prime -> Expression ;
 Expression -> Simple-expression-zegond
-Expression -> @CHECK_DECL @SAVE_FUN @SAVE_TYPE_CHECK #PUSH_ID ID B
-B -> = Expression @TYPE_CHECK #ASSIGN
-B -> @INDEX_ARRAY [ Expression ] @INDEX_ARRAY_POP H
+Expression -> @check_decl @save_fun @save_type_check #push_id ID B
+B -> = Expression @type_check #assign
+B -> @index_array [ Expression ] #index_array @index_array_pop H
 B -> Simple-expression-prime
-H -> = Expression @TYPE_CHECK #ASSIGN
+H -> = Expression @type_check #assign
 H -> G D C
 Simple-expression-zegond -> Additive-expression-zegond C
 Simple-expression-prime -> Additive-expression-prime C
-C -> #SAVE_OP Relop Additive-expression @TYPE_CHECK #RELOP
+C -> #save_op Relop Additive-expression @type_check #relop
 C -> EPSILON
 Relop -> <
 Relop -> ==
 Additive-expression -> Term D
 Additive-expression-prime -> Term-prime D
 Additive-expression-zegond -> Term-zegond D
-D -> #SAVE_OP Addop Term @TYPE_CHECK #ADDOP D
+D -> #save_op Addop Term @type_check #addop D
 D -> EPSILON
 Addop -> +
 Addop -> -
 Term -> Factor G
 Term-prime -> Factor-prime G
 Term-zegond -> Factor-zegond G
-G -> * Factor @TYPE_CHECK #MULT G
+G -> * Factor @type_check #mult G
 G -> EPSILON
 Factor -> ( Expression )
-Factor -> @CHECK_DECL @SAVE_FUN @SAVE_TYPE_CHECK #PUSH_ID ID Var-call-prime
-Factor -> @SAVE_TYPE_CHECK #PUSH_CONST NUM
-Var-call-prime -> @PUSH_ARG_STACK ( Args @CHECK_ARGS ) #CALL_SEQ_CALLER @POP_ARG_STACK
+Factor -> @check_decl @save_fun @save_type_check #push_id ID Var-call-prime
+Factor -> @save_type_check #push_const NUM
+Var-call-prime -> @push_arg_stack ( Args @check_args ) #call_seq_caller @pop_arg_stack
 Var-call-prime -> Var-prime
-Var-prime -> @INDEX_ARRAY [ Expression ] @INDEX_ARRAY_POP
+Var-prime -> @index_array [ Expression ] #index_array @index_array_pop
 Var-prime -> EPSILON
-Factor-prime -> @PUSH_ARG_STACK ( Args @CHECK_ARGS ) #CALL_SEQ_CALLER @POP_ARG_STACK
+Factor-prime -> @push_arg_stack ( Args @check_args ) #call_seq_caller @pop_arg_stack
 Factor-prime -> EPSILON
 Factor-zegond -> ( Expression )
-Factor-zegond -> @SAVE_TYPE_CHECK #PUSH_CONST NUM
+Factor-zegond -> @save_type_check #push_const NUM
 Args -> Arg-list
 Args -> EPSILON
-Arg-list -> @SAVE_ARG Expression Arg-list-prime
-Arg-list-prime -> , @SAVE_ARG Expression Arg-list-prime
+Arg-list -> @save_arg Expression Arg-list-prime
+Arg-list-prime -> , @save_arg Expression Arg-list-prime
 Arg-list-prime -> EPSILON
