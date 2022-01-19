@@ -42,24 +42,57 @@ class ErrorHandler:
 
 
 class SymbolTableHandler:
-    table = dict()
 
-    @staticmethod
-    def init_table():
-        for keyword in ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'endif']:
-            with open('symbol_table.txt', 'a') as f:
-                SymbolTableHandler.table[keyword] = {'type': 'keyword'}
-                f.write(f'{len(SymbolTableHandler.table)}.\t{keyword}\n')
+    @classmethod
+    def init_table(cls):
+        cls.KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'endif']
+        cls.global_funcs = [{
+            'lexeme': "output",
+            'scope': 0,
+            'type': 'void',
+            'role': 'function',
+            'num_of_args': 1,
+            'params': ['int']
+        }]
+        cls.symbol_table = cls.global_funcs.copy()
+        cls.scope_stack = [0]
+        cls.temp_stack = [0]
+        cls.arg_list_stack = []
+        cls.declaration_flag = False
 
-    @staticmethod
-    def add_token_to_table(token: tuple):
-        if token[1] not in SymbolTableHandler.table:
-            with open('symbol_table.txt', 'a') as f:
-                SymbolTableHandler.table[token[1]] = {'type': token[0]}
-                f.write(f'{len(SymbolTableHandler.table)}.\t{token[1]}\n')
+    @classmethod
+    def install_id(cls, lexeme):
+        if not cls.declaration_flag:
+            i = cls.find_row_index(lexeme)
+            if i is not None:
+                return i
+        return len(cls.symbol_table)
 
-    @staticmethod
-    def is_token_keyword(token: str):
+    @classmethod
+    def add_id_to_table(cls, token):
+        symbol_id = cls.install_id(token[1])
+        if symbol_id == len(cls.symbol_table):
+            cls.insert(token[1])
+        return symbol_id
+
+    @classmethod
+    def scope(cls):
+        return len(cls.scope_stack) - 1
+
+    @classmethod
+    def insert(cls, lexeme):
+        cls.symbol_table.append({"lexeme": lexeme, "scope": cls.scope()})
+
+    @classmethod
+    def find_row_index(cls, value, attr="lexeme"):
+        for i in range(len(cls.symbol_table) - 1, -1, -1):
+            row = cls.symbol_table[i]
+            if row[attr] == value:
+                return i
+        return None
+
+    @classmethod
+    def is_token_keyword(cls, token: str):
         return bool(re.match(REGEX['keyword'], token))
 
 
