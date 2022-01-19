@@ -2,21 +2,21 @@ Program -> Declaration-list $
 Declaration-list -> Declaration Declaration-list
 Declaration-list -> EPSILON
 Declaration -> Declaration-initial Declaration-prime
-Declaration-initial -> Type-specifier ID
-Declaration-prime -> Fun-declaration-prime
-Declaration-prime -> Var-declaration-prime
-Var-declaration-prime -> ;
-Var-declaration-prime -> [ NUM ] ;
-Fun-declaration-prime -> ( Params ) Compound-stmt
+Declaration-initial -> @SAVE_TYPE Type-specifier @ASSIGN_TYPE ID
+Declaration-prime -> @ASSIGN_FUN_ROLE Fun-declaration-prime
+Declaration-prime -> @ASSIGN_VAR_ROLE Var-declaration-prime
+Var-declaration-prime -> @ASSIGN_LENGTH ;
+Var-declaration-prime -> [ @ASSIGN_LENGTH NUM ] ;
+Fun-declaration-prime -> ( @INC_SCOPE Params @ASSIGN_FUN_ATTRS ) Compound-stmt #CALC_STACKFRAME_SIZE #RETURN_SEQ_CALLEE @DEC_SCOPE
 Type-specifier -> int
 Type-specifier -> void
-Params -> int ID Param-prime Param-list
+Params -> @SAVE_TYPE @SAVE_PARAM int @ASSIGN_TYPE ID @ASSIGN_PARAM_ROLE Param-prime Param-list
 Params -> void
-Param-list -> , Param Param-list
+Param-list -> , @SAVE_PARAM Param Param-list
 Param-list -> EPSILON
-Param -> Declaration-initial Param-prime
-Param-prime -> [ ]
-Param-prime -> EPSILON
+Param -> Declaration-initial @ASSIGN_PARAM_ROLE Param-prime
+Param-prime -> @ASSIGN_LENGTH [ ]
+Param-prime -> @ASSIGN_LENGTH EPSILON
 Compound-stmt -> { Declaration-list Statement-list }
 Statement-list -> Statement Statement-list
 Statement-list -> EPSILON
@@ -25,54 +25,54 @@ Statement -> Compound-stmt
 Statement -> Selection-stmt
 Statement -> Iteration-stmt
 Statement -> Return-stmt
-Expression-stmt -> Expression ;
-Expression-stmt -> break ;
+Expression-stmt -> Expression #CLOSE_STMT ;
+Expression-stmt -> @CHECK_BREAK #BREAK_JP_SAVE break ;
 Expression-stmt -> ;
-Selection-stmt -> if ( Expression ) Statement Else-stmt
-Else-stmt -> endif
-Else-stmt -> else Statement endif
-Iteration-stmt -> repeat Statement until ( Expression )
-Return-stmt -> return Return-stmt-prime
+Selection-stmt -> if ( Expression ) #SAVE Statement Else-stmt
+Else-stmt -> endif #ENDIF
+Else-stmt -> else #ELSE Statement endif #IF_ELSE
+Iteration-stmt -> @PUSH_UNTIL repeat #LABEL Statement until ( Expression ) #UNTIL @POP_UNTIL
+Return-stmt -> return Return-stmt-prime #SET_RETVAL #RETURN_SEQ_CALLEE
 Return-stmt-prime -> ;
 Return-stmt-prime -> Expression ;
 Expression -> Simple-expression-zegond
-Expression -> ID B
-B -> = Expression
-B -> [ Expression ] H
+Expression -> @CHECK_DECL @SAVE_FUN @SAVE_TYPE_CHECK #PUSH_ID ID B
+B -> = Expression @TYPE_CHECK #ASSIGN
+B -> @INDEX_ARRAY [ Expression ] @INDEX_ARRAY_POP H
 B -> Simple-expression-prime
-H -> = Expression
+H -> = Expression @TYPE_CHECK #ASSIGN
 H -> G D C
 Simple-expression-zegond -> Additive-expression-zegond C
 Simple-expression-prime -> Additive-expression-prime C
-C -> Relop Additive-expression
+C -> #SAVE_OP Relop Additive-expression @TYPE_CHECK #RELOP
 C -> EPSILON
 Relop -> <
 Relop -> ==
 Additive-expression -> Term D
 Additive-expression-prime -> Term-prime D
 Additive-expression-zegond -> Term-zegond D
-D -> Addop Term D
+D -> #SAVE_OP Addop Term @TYPE_CHECK #ADDOP D
 D -> EPSILON
 Addop -> +
 Addop -> -
 Term -> Factor G
 Term-prime -> Factor-prime G
 Term-zegond -> Factor-zegond G
-G -> * Factor G
+G -> * Factor @TYPE_CHECK #MULT G
 G -> EPSILON
 Factor -> ( Expression )
-Factor -> ID Var-call-prime
-Factor -> NUM
-Var-call-prime -> ( Args )
+Factor -> @CHECK_DECL @SAVE_FUN @SAVE_TYPE_CHECK #PUSH_ID ID Var-call-prime
+Factor -> @SAVE_TYPE_CHECK #PUSH_CONST NUM
+Var-call-prime -> @PUSH_ARG_STACK ( Args @CHECK_ARGS ) #CALL_SEQ_CALLER @POP_ARG_STACK
 Var-call-prime -> Var-prime
-Var-prime -> [ Expression ]
+Var-prime -> @INDEX_ARRAY [ Expression ] @INDEX_ARRAY_POP
 Var-prime -> EPSILON
-Factor-prime -> ( Args )
+Factor-prime -> @PUSH_ARG_STACK ( Args @CHECK_ARGS ) #CALL_SEQ_CALLER @POP_ARG_STACK
 Factor-prime -> EPSILON
 Factor-zegond -> ( Expression )
-Factor-zegond -> NUM
+Factor-zegond -> @SAVE_TYPE_CHECK #PUSH_CONST NUM
 Args -> Arg-list
 Args -> EPSILON
-Arg-list -> Expression Arg-list-prime
-Arg-list-prime -> , Expression Arg-list-prime
+Arg-list -> @SAVE_ARG Expression Arg-list-prime
+Arg-list-prime -> , @SAVE_ARG Expression Arg-list-prime
 Arg-list-prime -> EPSILON
