@@ -135,6 +135,12 @@ def parse():
         else:
             a = current_token[0]
         for child, number in cur_state.children.items():
+            if child[0] == '#':
+                # todo
+                continue
+            if child[0] == '@':
+                #todo
+                continue
             if a in firsts[child]:
                 if child in terminals_set:
                     cur_nt.add_child(TreeNode("({}, {})".format(current_token[0], current_token[1]), parent=cur_nt))

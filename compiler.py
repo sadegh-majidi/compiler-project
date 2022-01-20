@@ -21,6 +21,8 @@ class ErrorHandler:
     MISSING = 'missing'
     ILLEGAL = 'illegal'
 
+
+
     @staticmethod
     def write_syntax_error(line_number: int, error_type: str, token: str):
         with open('syntax_errors.txt', 'a') as f:
