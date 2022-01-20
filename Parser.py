@@ -16,11 +16,13 @@ no_error = True
 
 
 class State:
-    def __init__(self, Non_terminal, value, has_epsilon=False):
+    def __init__(self, Non_terminal, value, semantic_symbols: list, has_epsilon=False):
         self.Non_terminal = Non_terminal
         self.children = dict()
         self.has_epsilon = has_epsilon
         self.value = value
+        self.semantic_symbols = semantic_symbols
+        self.last_actions = []
 
 
 class TreeNode:
@@ -50,7 +52,7 @@ def find_terminals_and_non_terminals():
         non_terminals_set.add(rule[0])
     for rule in grammar_production_rules:
         for T_or_NT in rule:
-            if T_or_NT not in non_terminals_set:
+            if T_or_NT not in non_terminals_set and (not (T_or_NT.startswith('@') or T_or_NT.startswith('#'))):
                 terminals_set.add(T_or_NT)
 
 
@@ -78,18 +80,21 @@ def set_first_and_follows():
 
 def initialize_diagrams():
     global states
-    cur_state = State('Program', 0)
+    cur_state = State('Program', 0, [])
     cur_state.children['Declaration-list'] = 1
     current_token = 'Program'
     state_count = 1
     state_count_temp = 1
-    states = [cur_state, State('Program', 1)]
+    states = [cur_state, State('Program', 1, [])]
+    temp_actions = []
     for rule in grammar_production_rules[1:]:
+        cur_state.last_actions = temp_actions
+        temp_actions = []
         if rule[0] == current_token:
             cur_state = states[state_count]
         else:
             state_count = state_count_temp = state_count_temp + 1
-            cur_state = State(rule[0], state_count)
+            cur_state = State(rule[0], state_count, [])
             states.append(cur_state)
             current_token = rule[0]
         for smt in rule[1:]:
@@ -98,9 +103,14 @@ def initialize_diagrams():
             if smt == '':
                 continue
 
+            if smt.startswith('#') or smt.startswith('@'):
+                temp_actions.append(smt)
+                continue
+
             state_count_temp += 1
             cur_state.children[smt] = state_count_temp
-            cur_state = State(rule[0], state_count_temp)
+            cur_state = State(rule[0], state_count_temp, temp_actions)
+            temp_actions = []
             states.append(cur_state)
 
 
@@ -121,12 +131,16 @@ def parse():
         if cur_state.value == 1 and current_token[0] == '$':
             break
         if cur_state.value == 1 and current_token != '$':
-            ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.MISSING,
-                                            '$')
+            ErrorHandler.write_syntax_error(scanner.line_number, ErrorHandler.MISSING, '$')
             no_error = False
             write_dollar = False
             break
         if len(cur_state.children) == 0:
+            for action in cur_state.last_actions:
+                if action.startswith('#'):
+                    pass
+                elif action.startswith('@'):
+                    pass
             stack.pop()
             stack.pop()
             continue
@@ -135,19 +149,19 @@ def parse():
         else:
             a = current_token[0]
         for child, number in cur_state.children.items():
-            if child[0] == '#':
-                # todo
-                continue
-            if child[0] == '@':
-                #todo
-                continue
             if a in firsts[child]:
                 if child in terminals_set:
                     cur_nt.add_child(TreeNode("({}, {})".format(current_token[0], current_token[1]), parent=cur_nt))
                     stack.pop()
                     stack.pop()
                     stack.append(cur_nt)
-                    stack.append(states[number])
+                    next_state = states[number]
+                    stack.append(next_state)
+                    for action in next_state.semantic_symbols:
+                        if action.startswith('#'):
+                            pass
+                        elif action.startswith('@'):
+                            pass
                     current_token = scanner.get_next_token()
                 else:
                     new_child = TreeNode(child, parent=cur_nt)
@@ -155,7 +169,13 @@ def parse():
                     stack.pop()
                     stack.pop()
                     stack.append(cur_nt)
-                    stack.append(states[number])
+                    next_state = states[number]
+                    stack.append(next_state)
+                    for action in next_state.semantic_symbols:
+                        if action.startswith('#'):
+                            pass
+                        elif action.startswith('@'):
+                            pass
                     stack.append(new_child)
                     stack.append(get_first_state(child))
                 break
@@ -165,13 +185,25 @@ def parse():
                 stack.pop()
                 stack.pop()
                 stack.append(cur_nt)
-                stack.append(states[number])
+                next_state = states[number]
+                stack.append(next_state)
+                for action in next_state.semantic_symbols:
+                    if action.startswith('#'):
+                        pass
+                    elif action.startswith('@'):
+                        pass
                 stack.append(new_child)
                 stack.append(get_first_state(child))
                 break
 
             elif child == 'EPSILON' and a in follows[cur_state.Non_terminal]:
                 cur_nt.add_child(TreeNode('epsilon', parent=cur_nt))
+                next_state = states[number]
+                for action in next_state.semantic_symbols:
+                    if action.startswith('#'):
+                        pass
+                    elif action.startswith('@'):
+                        pass
                 stack.pop()
                 stack.pop()
                 break
