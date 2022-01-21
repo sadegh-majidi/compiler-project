@@ -98,6 +98,49 @@ class SymbolTableHandler:
         return bool(re.match(REGEX['keyword'], token))
 
 
+class MemoryHandler:
+
+    @classmethod
+    def init_manager(cls):
+        cls.pb_ptr = 0
+        cls.static_base_ptr = 100
+        cls.temp_base_ptr = 500
+        cls.stack_base_ptr = 3000
+
+        cls.static_offset = 0
+        cls.temp_offset = 0
+        cls.locals_field_offset = 0
+        cls.temps_field_offset = 0
+        cls.arrays_field_offset = 0
+        cls.args_field_offset = 4
+
+    @classmethod
+    def reset_manager(cls):
+        cls.locals_field_offset = 0
+        cls.arrays_field_offset = 0
+        cls.temps_field_offset = 0
+        cls.args_field_offset = 4
+
+    @classmethod
+    def get_static(cls, num_of_cells=1):
+        static = cls.static_base_ptr + cls.static_offset
+        cls.static_offset += 4 * num_of_cells
+        return static
+
+    @classmethod
+    def get_temp(cls):
+        temp = cls.temp_base_ptr + cls.temp_offset
+        cls.temp_offset += 4
+        SymbolTableHandler.temp_stack[-1] += 4
+        return temp
+
+    @classmethod
+    def get_param_offset(cls):
+        offset = cls.args_field_offset
+        cls.args_field_offset += 4
+        return offset
+
+
 if __name__ == '__main__':
     from Parser import scan_and_parse
 
