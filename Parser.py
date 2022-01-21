@@ -2,8 +2,10 @@ import re
 
 from anytree import Node, RenderTree
 
+from code_generator import CodeGenerator
 from compiler import ErrorHandler, SymbolTableHandler
 from lexical_analyzer import LexicalAnalyzer
+from semantic_analyzer import SemanticAnalyzer
 
 non_terminals_set = set()
 terminals_set = set()
@@ -13,6 +15,9 @@ grammar_production_rules = []
 states = []
 write_dollar = True
 no_error = True
+
+code_generator = CodeGenerator()
+semantic_analyzer = SemanticAnalyzer()
 
 
 class State:
@@ -138,9 +143,9 @@ def parse():
         if len(cur_state.children) == 0:
             for action in cur_state.last_actions:
                 if action.startswith('#'):
-                    pass
+                    code_generator.code_gen(action, current_token)
                 elif action.startswith('@'):
-                    pass
+                    semantic_analyzer.semantic_check(action, current_token, scanner.line_number)
             stack.pop()
             stack.pop()
             continue
@@ -163,9 +168,9 @@ def parse():
                     stack.append(next_state)
                     for action in next_state.semantic_symbols:
                         if action.startswith('#'):
-                            pass
+                            code_generator.code_gen(action, current_token)
                         elif action.startswith('@'):
-                            pass
+                            semantic_analyzer.semantic_check(action, current_token, scanner.line_number)
                     current_token = scanner.get_next_token()
                 else:
                     new_child = TreeNode(child, parent=cur_nt)
@@ -177,9 +182,9 @@ def parse():
                     stack.append(next_state)
                     for action in next_state.semantic_symbols:
                         if action.startswith('#'):
-                            pass
+                            code_generator.code_gen(action, current_token)
                         elif action.startswith('@'):
-                            pass
+                            semantic_analyzer.semantic_check(action, current_token, scanner.line_number)
                     stack.append(new_child)
                     stack.append(get_first_state(child))
                 break
@@ -193,9 +198,9 @@ def parse():
                 stack.append(next_state)
                 for action in next_state.semantic_symbols:
                     if action.startswith('#'):
-                        pass
+                        code_generator.code_gen(action, current_token)
                     elif action.startswith('@'):
-                        pass
+                        semantic_analyzer.semantic_check(action, current_token, scanner.line_number)
                 stack.append(new_child)
                 stack.append(get_first_state(child))
                 break
@@ -205,9 +210,9 @@ def parse():
                 next_state = states[number]
                 for action in next_state.semantic_symbols:
                     if action.startswith('#'):
-                        pass
+                        code_generator.code_gen(action, current_token)
                     elif action.startswith('@'):
-                        pass
+                        semantic_analyzer.semantic_check(action, current_token, scanner.line_number)
                 stack.pop()
                 stack.pop()
                 break
