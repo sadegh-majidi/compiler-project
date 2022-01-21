@@ -2,7 +2,7 @@ import re
 
 from anytree import Node, RenderTree
 
-from compiler import ErrorHandler
+from compiler import ErrorHandler, SymbolTableHandler
 from lexical_analyzer import LexicalAnalyzer
 
 non_terminals_set = set()
@@ -151,7 +151,11 @@ def parse():
         for child, number in cur_state.children.items():
             if a in firsts[child]:
                 if child in terminals_set:
-                    cur_nt.add_child(TreeNode("({}, {})".format(current_token[0], current_token[1]), parent=cur_nt))
+                    if current_token[0] == 'ID':
+                        token_lexeme = SymbolTableHandler.symbol_table[current_token[1]]['lexeme']
+                    else:
+                        token_lexeme = current_token[1]
+                    cur_nt.add_child(TreeNode("({}, {})".format(current_token[0], token_lexeme), parent=cur_nt))
                     stack.pop()
                     stack.pop()
                     stack.append(cur_nt)

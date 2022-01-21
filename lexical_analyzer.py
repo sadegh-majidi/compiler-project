@@ -39,9 +39,10 @@ class LexicalAnalyzer:
                             token_type = 'keyword'
 
                         token = (token_type, self.token)
-                        self.valid_tokens.append(token)
                         if token_type == 'identifier':
-                            SymbolTableHandler.add_id_to_table(token)
+                            token_id = SymbolTableHandler.add_id_to_table(token)
+                            token = (token_type, token_id)
+                        self.valid_tokens.append(token)
                         self.index = index
                         self.state = STATES['initial']
                         self.token = ''
@@ -104,9 +105,10 @@ class LexicalAnalyzer:
                         token_type = 'keyword'
 
                     token = (token_type, self.token)
-                    self.valid_tokens.append(token)
                     if token_type == 'identifier':
-                        SymbolTableHandler.add_id_to_table(token)
+                        token_id = SymbolTableHandler.add_id_to_table(token)
+                        token = (token_type, token_id)
+                    self.valid_tokens.append(token)
 
                 if self.state == STATES['multi_line_comment'] and self.token[-2:] != '*/':
                     comment_start_line = self.line_number - self.token.count('\n')
