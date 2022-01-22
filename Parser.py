@@ -3,7 +3,7 @@ import re
 from anytree import Node, RenderTree
 
 from code_generator import CodeGenerator
-from compiler import ErrorHandler, SymbolTableHandler
+from compiler import ErrorHandler, SymbolTableHandler, MemoryHandler
 from lexical_analyzer import LexicalAnalyzer
 from semantic_analyzer import SemanticAnalyzer
 
@@ -257,6 +257,7 @@ def scan_and_parse():
     set_first_and_follows()
 
     initialize_diagrams()
+    MemoryHandler.init_manager()
     parse()
     head_print_node = Node(head_node.value)
     drawTree(head_node, head_print_node)

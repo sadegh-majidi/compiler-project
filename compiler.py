@@ -82,6 +82,13 @@ class SymbolTableHandler:
         return len(cls.scope_stack) - 1
 
     @classmethod
+    def get_enclosing_function(cls, level=1):
+        try:
+            return cls.symbol_table[cls.scope_stack[-level] - 1]
+        except IndexError:
+            return None
+
+    @classmethod
     def insert(cls, lexeme):
         cls.symbol_table.append({"lexeme": lexeme, "scope": cls.scope()})
 
@@ -91,6 +98,14 @@ class SymbolTableHandler:
             row = cls.symbol_table[i]
             if row[attr] == value:
                 return i
+        return None
+
+    @classmethod
+    def find_row(cls, value, attr="lexeme"):
+        for i in range(len(cls.symbol_table) - 1, -1, -1):
+            row = cls.symbol_table[i]
+            if row[attr] == value:
+                return row
         return None
 
     @classmethod
