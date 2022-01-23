@@ -211,20 +211,132 @@ class CodeGenerator:
         self.add_intermediate_code(('ADD', '#' + str(var_addr), t, t))
         self.semantic_stack.append('@' + str(t))
 
-    def call_sequence_caller(self, current_token):
-        pass
+    def call_sequence_caller(self, current_token, back_patch=False):
+        stack = self.semantic_stack if not back_patch else self.call_stack
+
+        if back_patch:
+            callee = stack.pop()
+            store_idx = MemoryHandler.pb_ptr
+            t_ret_val = stack.pop()
+            self.number_of_args[-1] = stack.pop()
+            MemoryHandler.pb_ptr = stack.pop()
+        else:
+            callee = stack[-(self.number_of_args[-1] + 1)]
+
+        caller = SymbolTableHandler.get_enclosing_function()
+
+        if callee['lexeme'] == 'output':
+            arg = stack.pop()
+            stack.pop()
+            arg_addr = self.resolve_addr(arg)
+            self.add_intermediate_code(('ASSIGN', arg_addr, MemoryHandler.static_base_ptr + 4))
+            self.add_intermediate_code(('PRINT', MemoryHandler.static_base_ptr + 4))
+            self.number_of_args[-1] = 0
+            self.semantic_stack.append('void')
+            return
+
+        if not back_patch:
+            t_ret_val = MemoryHandler.get_temp()
+
+        if "frame_size" in caller:
+            top_sp = MemoryHandler.static_base_ptr
+            frame_size = caller['frame_size']
+            t_new_top_sp = MemoryHandler.get_temp()
+            self.add_intermediate_code(('ADD', top_sp, '#' + str(frame_size), t_new_top_sp), ins=back_patch)
+            self.add_intermediate_code(('ASSIGN', top_sp, '@' + str(t_new_top_sp)), ins=back_patch)
+            t_args = MemoryHandler.get_temp()
+            self.add_intermediate_code(('ADD', t_new_top_sp, "#4", t_args), ins=back_patch)
+            n_args = callee["num_of_args"]
+            args = stack[-n_args:]
+            for i in range(n_args):
+                stack.pop()
+                arg = args[i]
+                arg_addr = self.resolve_addr(arg)
+                if callee['params'][-i - 1] == 'array':
+                    arg_addr = f"#{arg}"
+                self.add_intermediate_code(('ASSIGN', arg_addr, '@' + str(t_args)), ins=back_patch)
+                self.add_intermediate_code(('ADD', t_args, "#4", t_args), ins=back_patch)
+            fun_addr = stack.pop()['address']
+            t_ret_addr = MemoryHandler.get_temp()
+            t_ret_val_callee = MemoryHandler.get_temp()
+            # TODO: update stack pointer via access link and static offset
+            self.add_intermediate_code(('SUB', t_new_top_sp, "#4", t_ret_addr), ins=back_patch)
+            self.add_intermediate_code(('SUB', t_new_top_sp, "#8", t_ret_val_callee), ins=back_patch)
+            self.add_intermediate_code(('ASSIGN', t_new_top_sp, top_sp), ins=back_patch)
+            self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.pb_ptr + 2}', f'@{t_ret_addr}'), ins=back_patch)
+            self.add_intermediate_code(('JP', fun_addr), ins=back_patch)
+            self.add_intermediate_code(('ASSIGN', f'@{t_ret_val_callee}', t_ret_val), ins=back_patch)
+            self.add_intermediate_code(('SUB', top_sp, f'#{frame_size}', top_sp), ins=back_patch)
+        else:
+            callee = stack[-(self.number_of_args[-1] + 1)]
+            self.call_stack += self.semantic_stack[-(self.number_of_args[-1] + 1):]
+            num_offset_vars = 0
+            for i in range(1, callee['num_of_args'] + 1):
+                arg = self.semantic_stack[-i]
+                if not isinstance(arg, int) and 'offset' in arg:
+                    num_offset_vars += 1
+            self.semantic_stack = self.semantic_stack[:-(self.number_of_args[-1] + 1)]
+            self.call_stack.append(MemoryHandler.pb_ptr)
+            self.call_stack.append(self.number_of_args[-1])
+            self.call_stack.append(t_ret_val)
+            self.call_stack.append(callee)
+
+            for _ in range(10 + callee['num_of_args'] * 2 + num_offset_vars):
+                self.add_intermediate_code(None)
+
+        if back_patch:
+            MemoryHandler.pb_ptr = store_idx
+        else:
+            if callee['type'] == 'void':
+                self.semantic_stack.append('void')
+            else:
+                self.semantic_stack.append(t_ret_val)
 
     def call_sequence_callee(self, current_token):
         pass
 
     def return_sequence_callee(self, current_token):
-        pass
+        t1 = MemoryHandler.get_temp()
+        self.add_intermediate_code(('SUB', MemoryHandler.static_base_ptr, '#4', t1))
+        t2 = MemoryHandler.get_temp()
+        self.add_intermediate_code(('ASSIGN', '@' + str(t1), t2))
+        self.add_intermediate_code(('JP', '@' + str(t2)))
 
     def set_return_value(self, current_token):
-        pass
+        t = MemoryHandler.get_temp()
+        self.add_intermediate_code(('SUB', MemoryHandler.static_base_ptr, '#8', t))
+        try:
+            return_value_addr = self.resolve_addr(self.semantic_stack.pop())
+            self.add_intermediate_code(('ASSIGN', return_value_addr, '@' + str(t)))
+        except IndexError:
+            self.add_intermediate_code(('ASSIGN', '#0', '@' + str(t)))
 
     def calculate_stack_frame_size(self, current_token):
-        pass
+        func_row = SymbolTableHandler.get_enclosing_function()
+        func_row["args_size"] = 0
+        func_row["locals_size"] = 0
+        func_row["arrays_size"] = 0
+        func_row["temps_size"] = SymbolTableHandler.temp_stack.pop()
+        if not SymbolTableHandler.temp_stack:
+            SymbolTableHandler.temp_stack = [0]
+        for i in range(SymbolTableHandler.scope_stack[-1], len(SymbolTableHandler.symbol_table)):
+            if SymbolTableHandler.symbol_table[i]["role"] == "local_var":
+                if SymbolTableHandler.symbol_table[i]["type"] == "array":
+                    func_row["arrays_size"] += 4 * SymbolTableHandler.symbol_table[i]["num_of_args"]
+                func_row["locals_size"] += 4
+            else:
+                func_row["args_size"] += 4
+
+        func_row["frame_size"] = func_row["args_size"] + func_row["locals_size"] + func_row["arrays_size"] + func_row["temps_size"] + 12
+        func_row["args_offset"] = 4
+        func_row["locals_offset"] = func_row["args_offset"] + func_row["args_size"]
+        func_row["arrays_offset"] = func_row["locals_offset"] + func_row["locals_size"]
+        func_row["temps_offset"] = func_row["arrays_offset"] + func_row["arrays_size"]
+
+        while self.call_stack:
+            self.call_sequence_caller(current_token, True)
+
+        MemoryHandler.reset_manager()
 
     def code_gen(self, action_symbol, current_token):
         try:
