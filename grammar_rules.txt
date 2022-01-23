@@ -31,7 +31,7 @@ Expression-stmt -> ;
 Selection-stmt -> if ( Expression ) #save Statement Else-stmt
 Else-stmt -> endif #endif
 Else-stmt -> else #else Statement endif #if_else
-Iteration-stmt -> @push_until repeat #label Statement until ( Expression ) #until @pop_until
+Iteration-stmt -> @push_until repeat #label #init_rep_until_stacks Statement until ( Expression ) #until @pop_until
 Return-stmt -> return Return-stmt-prime #set_retval #return_seq_callee
 Return-stmt-prime -> ;
 Return-stmt-prime -> Expression ;
