@@ -9,6 +9,7 @@ from state import REGEX
 class ErrorHandler:
     has_lexical_error = False
     has_syntax_error = False
+    has_semantic_error = False
     has_unexpected_eof = False
     line_number = 0
 
@@ -20,8 +21,16 @@ class ErrorHandler:
     UNEXPECTED = 'Unexpected'
     MISSING = 'missing'
     ILLEGAL = 'illegal'
+    semantic_errors = []
 
-
+    @staticmethod
+    def write_semantic_errors_output():
+        with open('semantic_errors.txt', 'w') as f:
+            if ErrorHandler.semantic_errors:
+                for lineno, error in ErrorHandler.semantic_errors:
+                    f.write(f'#{lineno} : Semantic Error! {error}\n')
+            else:
+                f.write('The input program is semantically correct.\n')
 
     @staticmethod
     def write_syntax_error(line_number: int, error_type: str, token: str):
