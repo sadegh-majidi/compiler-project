@@ -342,4 +342,4 @@ class CodeGenerator:
         try:
             self.actions[action_symbol](current_token)
         except Exception as e:
-            print(f"Error in semantic routine {action_symbol}:", str(e))
+            print(f'Error in semantic routine {action_symbol}:', str(e))
