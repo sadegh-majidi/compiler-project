@@ -127,9 +127,9 @@ class MemoryHandler:
     @classmethod
     def init_manager(cls):
         cls.pb_ptr = 0
-        cls.static_base_ptr = 100
-        cls.temp_base_ptr = 500
-        cls.stack_base_ptr = 3000
+        cls.static_base_ptr = 1000
+        cls.temp_base_ptr = 5000
+        cls.stack_base_ptr = 10008
 
         cls.static_offset = 0
         cls.temp_offset = 0

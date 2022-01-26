@@ -140,6 +140,9 @@ def parse():
             no_error = False
             write_dollar = False
             break
+        if current_token[1] == '[':
+            if semantic_analyzer.arg_array:
+                semantic_analyzer.change_arg_array_type()
         if len(cur_state.children) == 0:
             for action in cur_state.last_actions:
                 if action.startswith('#'):
@@ -258,7 +261,9 @@ def scan_and_parse():
 
     initialize_diagrams()
     MemoryHandler.init_manager()
+    code_generator.code_gen('init', None)
     parse()
+    code_generator.code_gen('finish', None)
     head_print_node = Node(head_node.value)
     drawTree(head_node, head_print_node)
 
@@ -277,3 +282,10 @@ def scan_and_parse():
     if no_error:
         with open('syntax_errors.txt', 'w', encoding="utf-8") as f:
             f.write('There is no syntax error.')
+
+    if ErrorHandler.has_semantic_error:
+        with open('output.txt', 'w') as f:
+            f.write('The output code has not been generated.')
+    else:
+        code_generator.write_inter_code_output()
+    ErrorHandler.write_semantic_errors_output()

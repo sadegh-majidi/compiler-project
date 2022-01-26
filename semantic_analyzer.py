@@ -13,6 +13,9 @@ class SemanticAnalyzer:
         self.func_param_list = []
         self.func_arg_list = []
 
+        self.arg_array = False
+        self.arg_array_addr = 0
+
         self.semantic_check_actions = {
               '@save_type': self.save_type,
               '@assign_type': self.assign_type,
@@ -115,9 +118,16 @@ class SemanticAnalyzer:
         if len(SymbolTableHandler.arg_list_stack) > 1:
             SymbolTableHandler.arg_list_stack.pop()
 
+    def change_arg_array_type(self):
+        SymbolTableHandler.arg_list_stack[-1][self.arg_array_addr] = 'int'
+        self.arg_array = False
+
     def save_arg(self, current_token, line_number):
         if current_token[0] == "ID":
             SymbolTableHandler.arg_list_stack[-1].append(SymbolTableHandler.symbol_table[current_token[1]].get('type'))
+            if SymbolTableHandler.arg_list_stack[-1][-1] == 'array':
+                self.arg_array = True
+                self.arg_array_addr = len(SymbolTableHandler.arg_list_stack[-1]-1)
         else:
             SymbolTableHandler.arg_list_stack[-1].append('int')
 
@@ -192,10 +202,10 @@ class SemanticAnalyzer:
             if operand2_type is not None and operand1_type is not None:
                 if operand1_type == 'array':
                     ErrorHandler.has_semantic_error = True
-                    ErrorHandler.semantic_errors.append((line_number, f"Type mismatch in operands, Got '{operand1_type}' instead of 'int'."))
+                    ErrorHandler.semantic_errors.append((line_number, f"Type mismatch in operands, Got {operand1_type} instead of int."))
                 elif operand1_type != operand2_type:
                     ErrorHandler.has_semantic_error = True
-                    ErrorHandler.semantic_errors.append((line_number, f"Type mismatch in operands, Got '{operand2_type}' instead of '{operand1_type}'."))
+                    ErrorHandler.semantic_errors.append((line_number, f"Type mismatch in operands, Got {operand2_type} instead of {operand1_type}."))
                 else:
                     self.type_check_stack.append(operand1_type)
         except IndexError:
