@@ -205,10 +205,14 @@ class CodeGenerator:
 
     def index_array(self, current_token):
         index = self.resolve_addr(self.semantic_stack.pop())
-        var_addr = self.resolve_addr(self.semantic_stack.pop())
+        x = self.semantic_stack.pop()
+        if 'address' in x:
+            var_addr = '#' + str(x['address'])
+        else:
+            var_addr = self.resolve_addr(x)
         t = MemoryHandler.get_temp()
         self.add_intermediate_code(('MULT', index, '#4', t))
-        self.add_intermediate_code(('ADD', '#' + str(var_addr), t, t))
+        self.add_intermediate_code(('ADD', str(var_addr), t, t))
         self.semantic_stack.append('@' + str(t))
 
     def call_sequence_caller(self, current_token, back_patch=False):
@@ -252,8 +256,8 @@ class CodeGenerator:
                 stack.pop()
                 arg = args[i]
                 arg_addr = self.resolve_addr(arg)
-                if callee['params'][-i - 1] == 'array':
-                    arg_addr = f"#{arg}"
+                if callee['params'][i] == 'array':
+                    arg_addr = f"#{arg_addr}"
                 self.add_intermediate_code(('ASSIGN', arg_addr, '@' + str(t_args)), ins=back_patch)
                 self.add_intermediate_code(('ADD', t_args, "#4", t_args), ins=back_patch)
             fun_addr = stack.pop()['address']
@@ -265,7 +269,10 @@ class CodeGenerator:
             self.add_intermediate_code(('ASSIGN', t_new_top_sp, top_sp), ins=back_patch)
             self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.pb_ptr + 2}', f'@{t_ret_addr}'), ins=back_patch)
             self.add_intermediate_code(('JP', fun_addr), ins=back_patch)
-            self.add_intermediate_code(('ASSIGN', f'@{t_ret_val_callee}', t_ret_val), ins=back_patch)
+            if callee['type'] != 'void':
+                self.add_intermediate_code(('ASSIGN', f'@{t_ret_val_callee}', t_ret_val), ins=back_patch)
+            else:
+                self.PB.pop()
             self.add_intermediate_code(('SUB', top_sp, f'#{frame_size}', top_sp), ins=back_patch)
         else:
             callee = stack[-(self.number_of_args[-1] + 1)]
