@@ -74,7 +74,7 @@ class CodeGenerator:
         if inc:
             MemoryHandler.pb_ptr += 1
 
-    def resolve_addr(self, operand):
+    def resolve_addr(self, operand, back_patch=False):
         if isinstance(operand, int) or isinstance(operand, str):
             return operand
         elif 'address' in operand:
@@ -82,7 +82,8 @@ class CodeGenerator:
         else:
             t = MemoryHandler.get_temp()
             self.add_intermediate_code(
-                self.format_three_address_code('ADD', MemoryHandler.static_base_ptr, f'#{operand["offset"]}', t)
+                self.format_three_address_code('ADD', MemoryHandler.static_base_ptr, f'#{operand["offset"]}', t),
+                ins=back_patch
             )
             return '@' + str(t)
 
@@ -255,7 +256,7 @@ class CodeGenerator:
             for i in range(n_args):
                 stack.pop()
                 arg = args[i]
-                arg_addr = self.resolve_addr(arg)
+                arg_addr = self.resolve_addr(arg, back_patch)
                 if callee['params'][i] == 'array':
                     arg_addr = f"#{arg_addr}"
                 self.add_intermediate_code(('ASSIGN', arg_addr, '@' + str(t_args)), ins=back_patch)
@@ -272,7 +273,7 @@ class CodeGenerator:
             if callee['type'] != 'void':
                 self.add_intermediate_code(('ASSIGN', f'@{t_ret_val_callee}', t_ret_val), ins=back_patch)
             else:
-                self.PB.pop()
+                self.add_intermediate_code(('JP', MemoryHandler.pb_ptr + 1), ins=back_patch)
             self.add_intermediate_code(('SUB', top_sp, f'#{frame_size}', top_sp), ins=back_patch)
         else:
             callee = stack[-(self.number_of_args[-1] + 1)]
