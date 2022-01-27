@@ -257,7 +257,7 @@ class CodeGenerator:
                 stack.pop()
                 arg = args[i]
                 arg_addr = self.resolve_addr(arg, back_patch)
-                if callee['params'][i] == 'array':
+                if callee['params'][i] == 'array' and (not (isinstance(arg_addr, str) and arg_addr.startswith('@'))):
                     arg_addr = f"#{arg_addr}"
                 self.add_intermediate_code(('ASSIGN', arg_addr, '@' + str(t_args)), ins=back_patch)
                 self.add_intermediate_code(('ADD', t_args, "#4", t_args), ins=back_patch)
@@ -314,7 +314,11 @@ class CodeGenerator:
         t = MemoryHandler.get_temp()
         self.add_intermediate_code(('SUB', MemoryHandler.static_base_ptr, '#8', t))
         try:
-            return_value_addr = self.resolve_addr(self.semantic_stack.pop())
+            func = SymbolTableHandler.get_enclosing_function()
+            if func['type'] != 'void':
+                return_value_addr = self.resolve_addr(self.semantic_stack.pop())
+            else:
+                return_value_addr = '#0'
             self.add_intermediate_code(('ASSIGN', return_value_addr, '@' + str(t)))
         except IndexError:
             self.add_intermediate_code(('ASSIGN', '#0', '@' + str(t)))
