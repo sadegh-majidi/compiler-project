@@ -264,17 +264,16 @@ class CodeGenerator:
             fun_addr = stack.pop()['address']
             t_ret_addr = MemoryHandler.get_temp()
             t_ret_val_callee = MemoryHandler.get_temp()
-            # TODO: update stack pointer via access link and static offset
             self.add_intermediate_code(('SUB', t_new_top_sp, "#4", t_ret_addr), ins=back_patch)
             self.add_intermediate_code(('SUB', t_new_top_sp, "#8", t_ret_val_callee), ins=back_patch)
             self.add_intermediate_code(('ASSIGN', t_new_top_sp, top_sp), ins=back_patch)
             self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.pb_ptr + 2}', f'@{t_ret_addr}'), ins=back_patch)
             self.add_intermediate_code(('JP', fun_addr), ins=back_patch)
             if callee['type'] != 'void':
-                self.add_intermediate_code(('ASSIGN', f'@{t_ret_val_callee}', t_ret_val), ins=back_patch)
+                self.add_intermediate_code(('ASSIGN', MemoryHandler.ret_base_ptr, t_ret_val), ins=back_patch)
             else:
                 self.add_intermediate_code(('JP', MemoryHandler.pb_ptr + 1), ins=back_patch)
-            self.add_intermediate_code(('SUB', top_sp, f'#{frame_size}', top_sp), ins=back_patch)
+
         else:
             callee = stack[-(self.number_of_args[-1] + 1)]
             self.call_stack += self.semantic_stack[-(self.number_of_args[-1] + 1):]
@@ -289,7 +288,7 @@ class CodeGenerator:
             self.call_stack.append(t_ret_val)
             self.call_stack.append(callee)
 
-            for _ in range(10 + callee['num_of_args'] * 2 + num_offset_vars):
+            for _ in range(9 + callee['num_of_args'] * 2 + num_offset_vars):
                 self.add_intermediate_code(None)
 
         if back_patch:
@@ -307,6 +306,9 @@ class CodeGenerator:
         t1 = MemoryHandler.get_temp()
         self.add_intermediate_code(('SUB', MemoryHandler.static_base_ptr, '#4', t1))
         t2 = MemoryHandler.get_temp()
+        func = SymbolTableHandler.get_enclosing_function()
+        if func['lexeme'] != 'main':
+            self.add_intermediate_code(('ASSIGN', '@' + str(MemoryHandler.static_base_ptr), MemoryHandler.static_base_ptr))
         self.add_intermediate_code(('ASSIGN', '@' + str(t1), t2))
         self.add_intermediate_code(('JP', '@' + str(t2)))
 
@@ -320,6 +322,7 @@ class CodeGenerator:
             else:
                 return_value_addr = '#0'
             self.add_intermediate_code(('ASSIGN', return_value_addr, '@' + str(t)))
+            self.add_intermediate_code(('ASSIGN', '@' + str(t), MemoryHandler.ret_base_ptr))
         except IndexError:
             self.add_intermediate_code(('ASSIGN', '#0', '@' + str(t)))
 
