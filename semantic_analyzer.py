@@ -117,6 +117,8 @@ class SemanticAnalyzer:
     def pop_arg_stack(self, current_token, line_number):
         if len(SymbolTableHandler.arg_list_stack) > 1:
             SymbolTableHandler.arg_list_stack.pop()
+        if self.arg_array:
+            self.arg_array = False
 
     def change_arg_array_type(self):
         SymbolTableHandler.arg_list_stack[-1][self.arg_array_addr] = 'int'
@@ -127,7 +129,7 @@ class SemanticAnalyzer:
             SymbolTableHandler.arg_list_stack[-1].append(SymbolTableHandler.symbol_table[current_token[1]].get('type'))
             if SymbolTableHandler.arg_list_stack[-1][-1] == 'array':
                 self.arg_array = True
-                self.arg_array_addr = len(SymbolTableHandler.arg_list_stack[-1]-1)
+                self.arg_array_addr = len(SymbolTableHandler.arg_list_stack[-1]) - 1
         else:
             SymbolTableHandler.arg_list_stack[-1].append('int')
 

@@ -97,15 +97,16 @@ class CodeGenerator:
 
     def initial_code_gen(self, current_token):
         self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.stack_base_ptr}', MemoryHandler.static_base_ptr))
+        self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.ret_base_ptr+4}', '10'))
         MemoryHandler.static_offset += 8
         for _ in range(3):
             self.add_intermediate_code(None)
 
     def finish_code_gen(self, current_token):
         t = MemoryHandler.get_temp()
-        self.add_intermediate_code(('SUB', MemoryHandler.static_base_ptr, '#4', t), idx=1, inc=False, ins=True)
-        self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.pb_ptr}', f'@{t}'), idx=2, inc=False, ins=True)
-        self.add_intermediate_code(('JP', SymbolTableHandler.find_row('main')['address']), idx=3, inc=False, ins=True)
+        self.add_intermediate_code(('SUB', MemoryHandler.static_base_ptr, '#4', t), idx=2, inc=False, ins=True)
+        self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.pb_ptr}', f'@{t}'), idx=3, inc=False, ins=True)
+        self.add_intermediate_code(('JP', SymbolTableHandler.find_row('main')['address']), idx=4, inc=False, ins=True)
 
     def push_const(self, current_token):
         addr = MemoryHandler.get_static()
@@ -270,7 +271,7 @@ class CodeGenerator:
             self.add_intermediate_code(('ASSIGN', f'#{MemoryHandler.pb_ptr + 2}', f'@{t_ret_addr}'), ins=back_patch)
             self.add_intermediate_code(('JP', fun_addr), ins=back_patch)
             if callee['type'] != 'void':
-                self.add_intermediate_code(('ASSIGN', MemoryHandler.ret_base_ptr, t_ret_val), ins=back_patch)
+                self.add_intermediate_code(('ASSIGN', '@' + str(MemoryHandler.ret_base_ptr), t_ret_val), ins=back_patch)
             else:
                 self.add_intermediate_code(('JP', MemoryHandler.pb_ptr + 1), ins=back_patch)
 
@@ -321,7 +322,9 @@ class CodeGenerator:
                 return_value_addr = self.resolve_addr(self.semantic_stack.pop())
             else:
                 return_value_addr = '#0'
-            self.add_intermediate_code(('ASSIGN', return_value_addr, '@' + str(t)))
+            self.add_intermediate_code(('ADD', '#4', '10', '10'))
+            self.add_intermediate_code(('ASSIGN', return_value_addr, '@10'))
+            self.add_intermediate_code(('ASSIGN', '10', '@' + str(t)))
             self.add_intermediate_code(('ASSIGN', '@' + str(t), MemoryHandler.ret_base_ptr))
         except IndexError:
             self.add_intermediate_code(('ASSIGN', '#0', '@' + str(t)))

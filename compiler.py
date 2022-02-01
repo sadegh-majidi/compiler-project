@@ -130,7 +130,7 @@ class MemoryHandler:
         cls.static_base_ptr = 1000
         cls.temp_base_ptr = 5000
         cls.stack_base_ptr = 10008
-        cls.ret_base_ptr = 10
+        cls.ret_base_ptr = 15000
 
         cls.static_offset = 0
         cls.temp_offset = 0
