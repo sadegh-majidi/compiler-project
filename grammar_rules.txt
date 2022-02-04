@@ -3,11 +3,11 @@ Declaration-list -> Declaration Declaration-list
 Declaration-list -> EPSILON
 Declaration -> Declaration-initial Declaration-prime
 Declaration-initial -> @save_type Type-specifier @assign_type ID
-Declaration-prime -> @assign_fun_role Fun-declaration-prime
-Declaration-prime -> @assign_var_role Var-declaration-prime
-Var-declaration-prime -> @assign_length ;
-Var-declaration-prime -> [ @assign_length NUM ] ;
-Fun-declaration-prime -> ( @inc_scope Params @assign_fun_attrs ) Compound-stmt #calc_stackframe_size #return_seq_callee @dec_scope
+Declaration-prime -> @ass_func_role Fun-declaration-prime
+Declaration-prime -> @ass_var_role Var-declaration-prime
+Var-declaration-prime -> @assign_len ;
+Var-declaration-prime -> [ @assign_len NUM ] ;
+Fun-declaration-prime -> ( @inc_scope Params @ass_fun_attrs ) Compound-stmt #stackframe #return_seq_callee @dec_scope
 Type-specifier -> int
 Type-specifier -> void
 Params -> @save_type @save_param int @assign_type ID @assign_param_role Param-prime Param-list
@@ -15,8 +15,8 @@ Params -> void
 Param-list -> , @save_param Param Param-list
 Param-list -> EPSILON
 Param -> Declaration-initial @assign_param_role Param-prime
-Param-prime -> @assign_length [ ]
-Param-prime -> @assign_length EPSILON
+Param-prime -> @assign_len [ ]
+Param-prime -> @assign_len EPSILON
 Compound-stmt -> { Declaration-list Statement-list }
 Statement-list -> Statement Statement-list
 Statement-list -> EPSILON
@@ -25,18 +25,18 @@ Statement -> Compound-stmt
 Statement -> Selection-stmt
 Statement -> Iteration-stmt
 Statement -> Return-stmt
-Expression-stmt -> Expression #close_stmt ;
+Expression-stmt -> Expression #end_stmt ;
 Expression-stmt -> @check_break #break_jp_save break ;
 Expression-stmt -> ;
 Selection-stmt -> if ( Expression ) #save Statement Else-stmt
 Else-stmt -> endif #endif
 Else-stmt -> else #else Statement endif #if_else
-Iteration-stmt -> @push_until repeat #label #init_rep_until_stacks Statement until ( Expression ) #until @pop_until
+Iteration-stmt -> @push_until repeat #label #init_rep_until Statement until ( Expression ) #until @pop_until
 Return-stmt -> return Return-stmt-prime #set_retval #return_seq_callee
 Return-stmt-prime -> ;
 Return-stmt-prime -> Expression ;
 Expression -> Simple-expression-zegond
-Expression -> @check_decl @save_fun @save_type_check #push_id ID B
+Expression -> @check_decl @save_func @save_type_check #pid ID B
 B -> = Expression @type_check #assign
 B -> @index_array [ Expression ] #index_array @index_array_pop H
 B -> Simple-expression-prime
@@ -61,8 +61,8 @@ Term-zegond -> Factor-zegond G
 G -> * Factor @type_check #mult G
 G -> EPSILON
 Factor -> ( Expression )
-Factor -> @check_decl @save_fun @save_type_check #push_id ID Var-call-prime
-Factor -> @save_type_check #push_const NUM
+Factor -> @check_decl @save_func @save_type_check #pid ID Var-call-prime
+Factor -> @save_type_check #pconst NUM
 Var-call-prime -> @push_arg_stack ( Args @check_args ) #call_seq_caller @pop_arg_stack
 Var-call-prime -> Var-prime
 Var-prime -> @index_array [ Expression ] #index_array @index_array_pop
@@ -70,7 +70,7 @@ Var-prime -> EPSILON
 Factor-prime -> @push_arg_stack ( Args @check_args ) #call_seq_caller @pop_arg_stack
 Factor-prime -> EPSILON
 Factor-zegond -> ( Expression )
-Factor-zegond -> @save_type_check #push_const NUM
+Factor-zegond -> @save_type_check #pconst NUM
 Args -> Arg-list
 Args -> EPSILON
 Arg-list -> @save_arg Expression Arg-list-prime

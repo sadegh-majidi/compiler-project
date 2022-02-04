@@ -66,9 +66,9 @@ class SymbolTableHandler:
             'params': ['int']
         }]
         cls.symbol_table = cls.global_funcs.copy()
+        cls.arg_list_stack = []
         cls.scope_stack = [0]
         cls.temp_stack = [0]
-        cls.arg_list_stack = []
         cls.declaration_flag = False
 
     @classmethod
@@ -134,16 +134,10 @@ class MemoryHandler:
 
         cls.static_offset = 0
         cls.temp_offset = 0
-        cls.locals_field_offset = 0
-        cls.temps_field_offset = 0
-        cls.arrays_field_offset = 0
         cls.args_field_offset = 4
 
     @classmethod
     def reset_manager(cls):
-        cls.locals_field_offset = 0
-        cls.arrays_field_offset = 0
-        cls.temps_field_offset = 0
         cls.args_field_offset = 4
 
     @classmethod

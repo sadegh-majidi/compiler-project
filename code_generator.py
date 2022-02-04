@@ -17,37 +17,33 @@ class CodeGenerator:
 
         self.actions = {
             'init': self.initial_code_gen,
-            '#calc_stackframe_size': self.calculate_stack_frame_size,
+            '#stackframe': self.calculate_stack_frame_size,
             '#return_seq_callee': self.return_sequence_callee,
-            '#close_stmt': self.close_statement,
+            '#end_stmt': self.close_statement,
             '#break_jp_save': self.break_jp_save,
             '#save': self.save,
             '#endif': self.endif_action,
             '#else': self.else_action,
             '#if_else': self.if_else_action,
             '#label': self.label,
-            '#init_rep_until_stacks': self.init_repeat_until_stacks,
+            '#init_rep_until': self.init_repeat_until_stacks,
             '#until': self.until,
             '#set_retval': self.set_return_value,
-            '#push_id': self.push_id,
+            '#pid': self.push_id,
             '#assign': self.assign,
             '#index_array': self.index_array,
             '#save_op': self.save_op,
             '#relop': self.add_rel_op,
             '#addop': self.add_rel_op,
             '#mult': self.mult_op,
-            '#push_const': self.push_const,
+            '#pconst': self.push_const,
             '#call_seq_caller': self.call_sequence_caller,
-            '#call_seq_callee': self.call_sequence_callee,
             'finish': self.finish_code_gen
         }
 
     @property
     def number_of_args(self):
         return [len(x) for x in SymbolTableHandler.arg_list_stack]
-
-    def get_static_address(self, offset):
-        return MemoryHandler.static_base_ptr + offset
 
     def format_three_address_code(self, operator, *args):
         three_addr_code = '(' + operator.upper()
@@ -300,9 +296,6 @@ class CodeGenerator:
             else:
                 self.semantic_stack.append(t_ret_val)
 
-    def call_sequence_callee(self, current_token):
-        pass
-
     def return_sequence_callee(self, current_token):
         t1 = MemoryHandler.get_temp()
         self.add_intermediate_code(('SUB', MemoryHandler.static_base_ptr, '#4', t1))
@@ -360,4 +353,4 @@ class CodeGenerator:
         try:
             self.actions[action_symbol](current_token)
         except Exception as e:
-            print(f'Error in semantic routine {action_symbol}:', str(e))
+            pass
