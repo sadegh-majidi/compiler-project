@@ -1,2 +1,8 @@
-# compiler-project
-kiram to ali abbasi ba madare dana afazeli kose madare har 2shono mijavam
+# CE40414-Compiler Project
+
+C-minus Compiler
+
+|Authors|
+|:----------|
+|*Mohammad Sadegh Majidi Yazdi*|
+|*Arya Jalali*|
