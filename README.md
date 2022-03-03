@@ -1,4 +1,4 @@
-# CE40414-Compiler Project
+# CE40414-Compiler Design Project
 
 C-minus Compiler
 
